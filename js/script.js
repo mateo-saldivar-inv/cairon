@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
       star.classList.add('star');
       star.style.left = Math.random() * 100 + '%';
       star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
       banner.appendChild(star);
     }
   
