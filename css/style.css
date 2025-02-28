@@ -1,11 +1,13 @@
+/* Load AR Julien font */
 @font-face {
     font-family: 'AR Julien';
     src: url('/fonts/arjulian.woff2') format('woff2'),
          url('/fonts/arjulian.woff') format('woff');
     font-weight: normal;
     font-style: normal;
-    font-display: swap; 
+    font-display: swap;
   }
+  
   *, *::before, *::after {
     box-sizing: border-box;
   }
@@ -20,15 +22,15 @@
     background-color: #0F233C;
     color: #FEE000;
     text-align: center;
-    padding: 20px 20px; 
-    overflow: hidden; 
-}
-
+    padding: 20px 20px;  /* Slimmer banner */
+    overflow: hidden;
+  }
+  
   header#banner h1 {
     font-family: 'AR Julien', sans-serif;
     font-size: 3em;
     color: #FEE000;
-    letter-spacing: 8px;
+    letter-spacing: 5px; /* Adjust as needed */
   }
   
   .star {
@@ -41,7 +43,7 @@
   
   .video-container {
     position: relative;
-    padding-bottom: 56.25%; 
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
     height: 0;
     overflow: hidden;
     max-width: 100%;
@@ -55,23 +57,34 @@
     height: 100%;
   }
   
+  /* PDF Section Styles */
   #pdf-section {
     padding: 20px;
-    max-width: 800px;
+    width: 100%;  /* Use the full width */
     margin: 0 auto;
   }
   #pdf-section h2 {
     text-align: center;
     margin-bottom: 10px;
   }
+  /* Ensure PDF canvases are responsive */
+  #pdf-viewer canvas {
+    display: block;
+    margin: 10px auto;
+    width: 100% !important;
+    height: auto !important;
+  }
   
+  /* Mobile adjustments */
   @media (max-width: 600px) {
     header#banner {
-        padding: 10px 10px; 
+      padding: 10px 10px;
     }
-    
     header#banner h1 {
-        font-size: 1.8em; 
+      font-size: 1.8em;
     }
-}
+    #pdf-section {
+      padding: 10px;
+    }
+  }
   

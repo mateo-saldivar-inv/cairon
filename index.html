@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cairon Juego de mesa</title>
   <link rel="stylesheet" href="css/style.css" />
+  <!-- Include PDF.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
 </head>
 <body>
   <header id="banner">
@@ -23,7 +25,8 @@
 
     <section id="pdf-section">
       <h2>Instructivo</h2>
-      <embed src="document.pdf" type="application/pdf" width="100%" height="600px" />
+      <!-- PDF viewer container -->
+      <div id="pdf-viewer"></div>
     </section>
   </main>
 
