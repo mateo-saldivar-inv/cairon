@@ -4,7 +4,7 @@
          url('/fonts/arjulian.woff') format('woff');
     font-weight: normal;
     font-style: normal;
-    font-display: swap; /* Improves performance */
+    font-display: swap; 
   }
   *, *::before, *::after {
     box-sizing: border-box;
@@ -20,9 +20,9 @@
     background-color: #0F233C;
     color: #FEE000;
     text-align: center;
-    padding: 40px 20px;
+    padding: 20px 20px; 
     overflow: hidden; 
-  }
+}
 
   header#banner h1 {
     font-family: 'AR Julien', sans-serif;
@@ -65,11 +65,12 @@
   }
   
   @media (max-width: 600px) {
+    header#banner {
+        padding: 10px 10px; 
+    }
+    
     header#banner h1 {
-      font-size: 2em;
+        font-size: 1.8em; 
     }
-    #pdf-section embed {
-      height: 400px;
-    }
-  }
+}
   
