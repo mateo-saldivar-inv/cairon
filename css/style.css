@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'AR Julien';
-    src: url('/fonts/ARJulien.woff2') format('woff2'),
-         url('/fonts/ARJulien.woff') format('woff');
+    src: url('/fonts/arjulian.woff2') format('woff2'),
+         url('/fonts/arjulian.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap; /* Improves performance */
