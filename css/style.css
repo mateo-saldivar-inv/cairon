@@ -16,6 +16,11 @@
     padding: 0;
     font-family: Arial, sans-serif;
   }
+
+  section#video-section {
+    margin-top: 0;  /* Remove top margin */
+    padding-top: 0; /* Remove any top padding */
+  }
   
   header#banner {
     position: relative;
@@ -24,6 +29,7 @@
     text-align: center;
     padding: 20px 20px;  /* Slimmer banner */
     overflow: hidden;
+    margin-bottom: 0; 
   }
   
   header#banner h1 {
@@ -47,7 +53,7 @@
     height: 0;
     overflow: hidden;
     max-width: 100%;
-    margin: 20px auto;
+    margin: 0 auto; /* Remove extra vertical margin */
   }
   .video-container iframe {
     position: absolute;
@@ -70,10 +76,11 @@
   /* Ensure PDF canvases are responsive */
   #pdf-viewer canvas {
     display: block;
-    margin: 10px auto;
+    margin: 2px auto; 
     width: 100% !important;
     height: auto !important;
   }
+  
   
   /* Mobile adjustments */
   @media (max-width: 600px) {
