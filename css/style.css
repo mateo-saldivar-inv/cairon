@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'AR Julien';
-    src: url('../fonts/ARJulien.woff2') format('woff2'),
-         url('../fonts/ARJulien.woff') format('woff');
+    src: url('/fonts/ARJulien.woff2') format('woff2'),
+         url('/fonts/ARJulien.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap; /* Improves performance */
@@ -23,7 +23,7 @@
     padding: 40px 20px;
     overflow: hidden; 
   }
-  
+
   header#banner h1 {
     font-family: 'AR Julien', sans-serif;
     font-size: 3em;
