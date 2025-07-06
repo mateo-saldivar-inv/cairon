@@ -1,0 +1,72 @@
+@import url("../css/style.css");   /* keeps fonts & stars */
+
+body { background:var(--moon); }
+
+header#banner{
+  position:sticky; top:0; z-index:10;
+  background:var(--navy);
+  color:var(--gold);
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 20px;
+}
+#globalClock{ font-size:1.25rem; letter-spacing:.5px; }
+
+.card{
+  background:#fff; border-radius:var(--radius);
+  padding:24px; margin:24px auto; max-width:900px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.card[data-step]{position:relative;}
+.card[data-step]:before{
+  content:attr(data-step);
+  position:absolute; top:12px; right:12px;
+  background:var(--gold); color:var(--navy);
+  width:28px; height:28px; border-radius:50%;
+  display:grid; place-items:center; font-weight:bold;
+}
+
+.grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+
+.timerBlock{display:flex; align-items:center; gap:8px;}
+.timerBlock span{font-family:'AR Julien',sans-serif; background:var(--gold); color:var(--navy);
+  padding:4px 10px; border-radius:var(--radius);}
+.timerBlock button{white-space:nowrap;}
+
+label{font-weight:600; display:flex; flex-direction:column; gap:4px;}
+input,select,textarea,button{
+  font:inherit; padding:8px 10px; border:1px solid #ccd; border-radius:var(--radius);
+}
+input[readonly]{background:#eef;}
+textarea{resize:vertical;}
+
+.chips input{margin-right:6px;}
+
+button{cursor:pointer; transition:background var(--dur);}
+button:not([disabled]):hover{background:#ffd83b;}
+button[disabled]{opacity:.5; cursor:not-allowed;}
+
+button.wide{grid-column:1/-1;}
+
+.fab{
+  position:fixed; right:24px; bottom:24px; width:56px; height:56px;
+  border-radius:50%; background:var(--gold); color:var(--navy);
+  font-size:1.4rem; box-shadow:0 3px 10px rgba(0,0,0,.25);
+}
+.hidden{display:none;}
+.active{border:2px solid var(--gold);}
+
+table{width:100%; border-collapse:collapse;}
+thead th{position:sticky; top:0; background:var(--navy); color:var(--gold);}
+td,th{padding:4px 6px; border:1px solid #dde; font-size:.85rem;}
+tbody tr:nth-child(even){background:#f8f9fb;}
+
+#toast{
+  position:fixed; bottom:24px; right:24px; max-width:220px;
+  pointer-events:none; font-weight:600;
+}
+.toastMsg{
+  animation:fade 3s forwards;
+  background:var(--navy); color:#fff; padding:10px 14px;
+  border-radius:var(--radius); margin-top:8px;
+}
+@keyframes fade{0%{opacity:0; transform:translateY(10px);}10%,90%{opacity:1;}100%{opacity:0;}}
