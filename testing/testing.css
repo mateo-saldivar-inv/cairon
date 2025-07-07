@@ -1,188 +1,164 @@
 /* ──────────────────────────────────────────────────────────
    CAIRON – Play-test UI
-   This file extends ../css/style.css (brand fonts, banner stars)
+   Extends ../css/style.css (fonts & banner)
    ────────────────────────────────────────────────────────── */
 
-/* ---------- 1. Design tokens ---------- */
+/* 1. Design tokens */
 :root {
-  --navy:  #0F233C;
-  --gold:  #FEE000;
-  --moon:  #f4f6f8;
-  --ink:   #222;
+  --navy:   #0F233C;
+  --gold:   #FEE000;
+  --moon:   #f4f6f8;
   --radius: 6px;
-  --dur: .25s;
+  --dur:    .25s;
   font-size: 16px;
   font-family: system-ui, Arial, sans-serif;
 }
 
-/* ---------- 2. Global layout ---------- */
-html, body { background: var(--moon); }
-
-main { padding: 0 1rem 4rem; }      /* leave space for FAB */
-
-/* Sticky banner keeps the global timer in view */
+/* 2. Global & banner */
+html, body { margin:0; padding:0; background: var(--moon); }
+main { padding: 0 1rem 4rem; }
 header#banner {
-  position: sticky; top: 0; z-index: 100;
-  background: var(--navy);
-  color: var(--gold);
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  position: sticky; top:0; z-index:100;
+  background: var(--navy); color: var(--gold);
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 20px; box-shadow:0 2px 6px rgba(0,0,0,.25);
 }
-#banner h1   { margin: 0; font-size: 1.6rem; letter-spacing: 2px; }
-#globalClock { font-size: 1.25rem; letter-spacing: .5px; }
+#banner h1 { margin:0; font-size:1.6rem; letter-spacing:2px; }
+#globalClock { font-size:1.25rem; letter-spacing:.5px; }
 
-/* ---------- 3. Card / step container ---------- */
+/* 3. Cards & steps */
 .card {
-  background: #fff;
-  border-radius: var(--radius);
-  padding: 24px;
-  margin: 24px auto;
-  max-width: 900px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  transition: border var(--dur);
+  background:#fff; border-radius:var(--radius);
+  padding:24px; margin:24px auto; max-width:900px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:border var(--dur);
 }
-.card.active { border: 2px solid var(--gold); }
-
-.card[data-step] { position: relative; }
+.card.active { border:2px solid var(--gold); }
+.card[data-step] { position:relative; }
 .card[data-step]::before {
-  content: attr(data-step);
-  position: absolute; top: 12px; right: 12px;
-  background: var(--gold); color: var(--navy);
-  width: 28px; height: 28px; border-radius: 50%;
-  display: grid; place-items: center;
-  font-weight: bold;
-  font-size: .9rem;
+  content:attr(data-step);
+  position:absolute; top:12px; right:12px;
+  background:var(--gold); color:var(--navy);
+  width:28px; height:28px; border-radius:50%;
+  display:grid; place-items:center;
+  font-weight:bold; font-size:.9rem;
 }
 
-/* ---------- 4. Form grid ---------- */
+/* 4. Grid & form controls */
 .grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display:grid; gap:16px;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 }
-
-label { font-weight: 600; display: flex; flex-direction: column; gap: 4px; }
+label { font-weight:600; display:flex; flex-direction:column; gap:4px; }
 input, select, textarea, button {
-  font: inherit;
-  padding: 8px 10px;
-  border: 1px solid #ccd;
-  border-radius: var(--radius);
-  background: #fff;
-  transition: border var(--dur), box-shadow var(--dur);
+  font:inherit; padding:8px 10px; border:1px solid #ccd;
+  border-radius:var(--radius); background:#fff;
+  transition:border var(--dur), box-shadow var(--dur);
 }
 input:focus, select:focus, textarea:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 2px rgba(254,224,0,.35);
-  outline: none;
+  border-color:var(--gold);
+  box-shadow:0 0 0 2px rgba(254,224,0,.35);
+  outline:none;
 }
-input[readonly] { background: #eef; cursor: default; }
-textarea { resize: vertical; min-height: 56px; }
+input[readonly] { background:#eef; cursor:default; }
+textarea { resize:vertical; }
 
-/* Small chips-style checkboxes */
-.chips input { margin-right: 6px; }
+/* 5. Grouped fieldsets */
+fieldset.group {
+  border:1px solid var(--navy);
+  border-radius:var(--radius);
+  padding:16px;
+  margin:16px 0;
+  background:#fafafa;
+}
+fieldset.group legend {
+  padding:0 8px; font-weight:bold; color:var(--navy);
+}
 
-/* Wide action button spans full grid width */
-button.wide { grid-column: 1 / -1; }
+/* 6. Chips (inline checkboxes) */
+label.chips {
+  display:inline-flex; flex-direction:row;
+  align-items:center; gap:0.5rem; cursor:pointer;
+}
+label.chips input { margin:0; }
 
-/* ---------- 5. Timer blocks ---------- */
+/* 7. Notes block */
+.notes-block {
+  margin:16px 0;
+}
+.notes-block textarea {
+  width:100%; min-height:100px;
+}
+
+/* 8. Timer blocks */
 .timerBlock {
-  display: flex; align-items: center; gap: 8px;
+  display:flex; align-items:center; gap:8px;
 }
 .timerBlock span {
-  font-family: 'AR Julien', sans-serif;
-  background: var(--gold);
-  color: var(--navy);
-  padding: 4px 10px;
-  border-radius: var(--radius);
-  min-width: 70px; text-align: center;
+  font-family:'AR Julien',sans-serif;
+  background:var(--gold); color:var(--navy);
+  padding:4px 10px; border-radius:var(--radius);
+  min-width:70px; text-align:center;
 }
-.timerBlock button { white-space: nowrap; }
+.timerBlock button { white-space:nowrap; }
 
-/* ---------- 6. Buttons ---------- */
+/* 9. Buttons & FAB */
 button {
-  background: var(--gold);
-  color: var(--navy);
-  cursor: pointer;
-  transition: background var(--dur), transform var(--dur);
+  background:var(--gold); color:var(--navy);
+  cursor:pointer; transition:background var(--dur), transform var(--dur);
 }
-button:not([disabled]):hover   { background: #ffd83b; }
-button:active { transform: scale(.97); }
-button[disabled] {
-  opacity: .5; cursor: not-allowed;
-}
+button:not([disabled]):hover { background:#ffd83b; }
+button:active { transform:scale(.97); }
+button[disabled] { opacity:.5; cursor:not-allowed; }
+button.wide { grid-column:1/-1; }
 
-/* Floating action button for “End Session” */
 .fab {
-  position: fixed; right: 24px; bottom: 24px;
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: var(--gold); color: var(--navy);
-  font-size: 1.4rem; border: none;
-  box-shadow: 0 3px 10px rgba(0,0,0,.25);
-  cursor: pointer;
-  transition: background var(--dur), transform var(--dur);
+  position:fixed; right:24px; bottom:24px;
+  width:56px; height:56px; border-radius:50%;
+  background:var(--gold); color:var(--navy);
+  font-size:1.4rem; border:none;
+  box-shadow:0 3px 10px rgba(0,0,0,.25);
+  cursor:pointer; transition:background var(--dur), transform var(--dur);
 }
-.fab:hover { background: #ffd83b; }
-.fab:active { transform: scale(.94); }
+.fab:hover { background:#ffd83b; }
+.fab:active { transform:scale(.94); }
 
-/* ---------- 7. History table ---------- */
-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+/* 10. History table */
+table { width:100%; border-collapse:collapse; margin-top:8px; }
 thead th {
-  position: sticky; top: 0;
-  background: var(--navy); color: var(--gold);
-  font-weight: 600; font-size: .85rem;
+  position:sticky; top:0; background:var(--navy);
+  color:var(--gold); font-weight:600; font-size:.85rem;
 }
-td, th { padding: 4px 6px; border: 1px solid #dde; font-size: .85rem; }
-tbody tr:nth-child(even) { background: #f8f9fb; }
+td, th { padding:4px 6px; border:1px solid #dde; font-size:.85rem; }
+tbody tr:nth-child(even) { background:#f8f9fb; }
 
-/* Compact Yes/No chips inside table cells (✓ / blank added by JS) */
-td:has(> .chip) { text-align: center; }
-.chip {
-  display: inline-block; width: 18px; height: 18px;
-  border-radius: 50%; line-height: 18px; font-size: .9rem;
-  background: var(--gold); color: var(--navy);
-}
+/* Disaster color code */
+.disaster { font-weight:600; }
+.disaster[data-type^="G"] { color:#c0392b; }
+.disaster[data-type^="L"] { color:#2980b9; }
 
-/* Colour-coded disaster abbreviations, e.g. “G-E” */
-.disaster { font-weight: 600; }
-.disaster[data-type^="G"] { color: #c0392b; }   /* global – red */
-.disaster[data-type^="L"] { color: #2980b9; }   /* local  – blue */
-
-/* ---------- 8. Toast notifications ---------- */
+/* 11. Toasts */
 #toast {
-  position: fixed; bottom: 24px; right: 24px;
-  max-width: 240px;
-  pointer-events: none;
-  z-index: 150;
+  position:fixed; bottom:24px; right:24px;
+  max-width:240px; pointer-events:none; z-index:150;
 }
 .toastMsg {
-  background: var(--navy);
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  margin-top: 8px;
-  font-weight: 600;
-  animation: toastFade 3s forwards;
+  background:var(--navy); color:#fff;
+  padding:10px 14px; border-radius:var(--radius);
+  margin-top:8px; font-weight:600;
+  animation:toastFade 3s forwards;
 }
 @keyframes toastFade {
-  0%   { opacity: 0; transform: translateY(10px); }
-  10%,90% { opacity: 1; transform: translateY(0); }
-  100%{ opacity: 0; transform: translateY(-10px); }
+  0%   { opacity:0; transform:translateY(10px); }
+  10%,90% { opacity:1; transform:translateY(0); }
+  100% { opacity:0; transform:translateY(-10px); }
 }
 
-/* ---------- 9. Utilities ---------- */
-.hidden  { display: none !important; }
-.visually-hidden {
-  position: absolute !important;
-  width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0); border: 0;
-}
-
-/* ---------- 10. Responsive tweaks ---------- */
-@media (max-width: 600px) {
-  .card { padding: 20px 16px; margin: 16px auto; }
-  .grid { gap: 12px; }
-  #banner h1 { font-size: 1.2rem; }
-  #globalClock { font-size: 1rem; }
+/* 12. Utils & responsive */
+.hidden { display:none !important; }
+@media (max-width:600px) {
+  .card { padding:20px 16px; margin:16px auto; }
+  .grid { gap:12px; }
+  #banner h1 { font-size:1.2rem; }
+  #globalClock { font-size:1rem; }
 }

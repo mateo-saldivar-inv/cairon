@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cairon – Testeo</title>
 
-  <!-- Brand base (font & stars) -->
+  <!-- Brand base (fonts & stars) -->
   <link rel="stylesheet" href="../css/style.css" />
 
   <!-- Play-test UI skin -->
@@ -13,27 +13,23 @@
 </head>
 
 <body>
-  <!-- ───── Sticky banner with global timer ───── -->
+  <!-- Sticky banner with global timer -->
   <header id="banner">
     <h1>CAIRON</h1>
-    <time id="globalClock" aria-live="polite">00:00:00</time>
+    <time id="globalClock" aria-live="polite">00:00</time>
   </header>
 
   <main>
-    <!-- ─── STEP 1 · SESSION SETUP ─────────────────── -->
+    <!-- STEP 1 · SESSION SETUP -->
     <section id="stepSession" class="card active" data-step="1">
       <h2>Crear Sesión</h2>
-
       <form id="sessionForm" autocomplete="off">
         <div class="grid">
           <label>Session ID
-            <input id="sessionId"
-                   type="text"
+            <input id="sessionId" type="text"
                    pattern="T\\d{2}-G\\d{2}"
-                   placeholder="T02-G07"
-                   required>
+                   placeholder="T02-G07" required>
           </label>
-
           <label>Nº Jugadores
             <select id="numPlayers" required>
               <option value="" disabled selected>—</option>
@@ -41,99 +37,107 @@
               <option>5</option><option>6</option><option>7</option><option>8</option>
             </select>
           </label>
-
           <label>Fecha
             <input id="sessionDate" type="date" readonly>
           </label>
-
           <div class="timerBlock">
-            <button id="btnSessionToggle"
-                    type="button"
-                    title="⌘/Ctrl + S">Start Session</button>
+            <button id="btnSessionToggle" type="button" title="⌘/Ctrl + S">
+              Start Session
+            </button>
           </div>
         </div>
       </form>
     </section>
 
-    <!-- ─── STEP 2 · TURN LOGGING ──────────────────── -->
+    <!-- STEP 2 · TURN LOGGING -->
     <section id="stepTurn" class="card" data-step="2">
       <h2>Registrar Turno</h2>
-
       <form id="turnForm" autocomplete="off">
+        <!-- Basic turn info -->
         <div class="grid">
           <label>Nº Turno
             <input id="turnNo" readonly>
           </label>
-
           <label>Jugador
             <select id="playerSelect"></select>
           </label>
-
           <div class="timerBlock">
             <span id="turnClock">0 s</span>
-            <button id="btnTurnToggle"
-                    type="button"
-                    title="Espacio">Start</button>
+            <button id="btnTurnToggle" type="button" title="Espacio">Start</button>
           </div>
-
-          <label><input id="completedCreature" type="checkbox">
-                 Criatura completada</label>
-
-          <label>Efecto
-            <select id="effectActivated">
-              <option>None</option><option>Combat</option>
-              <option>Exchange</option><option>Steal</option>
-            </select>
-          </label>
-
-          <label>Dirección
-            <select id="effectDirection">
-              <option>Left</option><option>Right</option>
-              <option>Wild</option><option>Cancel</option>
-            </select>
-          </label>
-
-          <label class="chips">
-            <input id="miracleUsed" type="checkbox"> Miracle
-          </label>
-
-          <label class="chips">
-            <input id="prodigyUsed" type="checkbox"> Prodigy
-          </label>
-
-          <label>Desastre
-            <select id="naturalDisaster">
-              <option>None</option>
-              <optgroup label="Global">
-                <option>Global – Earth</option>
-                <option>Global – Water</option>
-                <option>Global – Air</option>
-              </optgroup>
-              <optgroup label="Local">
-                <option>Local – Earth</option>
-                <option>Local – Water</option>
-                <option>Local – Air</option>
-              </optgroup>
-            </select>
-          </label>
-
-          <label>Notas
-            <textarea id="turnNotes" rows="2"></textarea>
-          </label>
-
-          <button id="btnSaveTurn"
-                  class="wide"
-                  type="button"
-                  title="Enter"
-                  disabled>Guardar Turno</button>
         </div>
+
+        <!-- Group 1: Criatura & Efectos -->
+        <fieldset class="group">
+          <legend>Criatura & Efectos</legend>
+          <div class="grid">
+            <label class="chips">
+              <input id="completedCreature" type="checkbox">
+              Completada
+            </label>
+            <label>Efecto
+              <select id="effectActivated">
+                <option>None</option><option>Combat</option>
+                <option>Exchange</option><option>Steal</option>
+              </select>
+            </label>
+            <label>Dirección
+              <select id="effectDirection">
+                <option>Left</option><option>Right</option>
+                <option>Wild</option><option>Cancel</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Group 2: Poderes & Desastres -->
+        <fieldset class="group">
+          <legend>Poderes & Desastres</legend>
+          <div class="grid">
+            <label class="chips">
+              <input id="miracleUsed" type="checkbox">
+              Miracle
+            </label>
+            <label class="chips">
+              <input id="prodigyUsed" type="checkbox">
+              Prodigy
+            </label>
+            <label>Desastre
+              <select id="naturalDisaster">
+                <option>None</option>
+                <optgroup label="Global">
+                  <option>Global – Earth</option>
+                  <option>Global – Water</option>
+                  <option>Global – Air</option>
+                </optgroup>
+                <optgroup label="Local">
+                  <option>Local – Earth</option>
+                  <option>Local – Water</option>
+                  <option>Local – Air</option>
+                </optgroup>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Notes at end, full width -->
+        <div class="notes-block">
+          <label>Notas (opcional)
+            <textarea id="turnNotes" rows="4"
+                      placeholder="Comentarios…"></textarea>
+          </label>
+        </div>
+
+        <!-- Save button -->
+        <button id="btnSaveTurn" class="wide" type="button" title="Enter" disabled>
+          Guardar Turno
+        </button>
       </form>
     </section>
 
-    <!-- ─── HISTORY TABLE ─────────────────────────── -->
+    <!-- HISTORY TABLE -->
     <section id="historyCard" class="card hidden">
       <h2>Historial</h2>
-
       <table id="turnTable">
         <thead></thead>
         <tbody></tbody>
@@ -141,9 +145,7 @@
     </section>
 
     <!-- Floating “End Session” action button -->
-    <button id="btnEndSession"
-            class="fab hidden"
-            title="Fin Sesión">⏹</button>
+    <button id="btnEndSession" class="fab hidden" title="Fin Sesión">⏹</button>
   </main>
 
   <!-- Toast notifications -->
