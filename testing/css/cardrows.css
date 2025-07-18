@@ -1,0 +1,74 @@
+#creatureList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .creature-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 38px;   /* fixed 38‑px button */
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .creature-row input,
+  .creature-row select,
+  .creature-row button {
+    height: 38px;
+    box-sizing: border-box;
+  }
+  
+  .creature-row button,
+  .special-row  button {
+    width: 38px;
+    height: 38px;
+    padding: 0;                 /* center the “–” */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    background: #ffdddd;
+    border: 1px solid #f55;
+    color: #900;
+    border-radius: var(--radius);
+  }
+  
+  .creature-row button:hover,
+  .special-row  button:hover {
+    background: #ffc9c9;
+  }
+
+  #specialList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .special-row {
+    display: grid;
+    gap: 0.5rem;
+    align-items: center;
+    width: 100%;
+  }
+  .special-row.row-desastre {
+    grid-template-columns: 4fr 1fr 1fr 1fr 38px;
+  }
+  .special-row.row-proteccion {
+    grid-template-columns: 4fr 1fr 1fr 38px;
+  }
+  .special-row select,
+  .special-row button {
+    height: 38px;
+    box-sizing: border-box;
+  }
+  
+
+  .special-row input,
+  .special-row select {
+    width: 100%;          /* occupy the whole column */
+    min-width: 0;         /* allow shrinking on small screens */
+  }
+
+ 

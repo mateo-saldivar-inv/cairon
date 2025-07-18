@@ -5,57 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cairon – Testeo</title>
 
-  <!-- Brand base (fonts & stars) -->
   <link rel="stylesheet" href="../css/style.css" />
-
-  <!-- Play-test UI skin -->
-  <link rel="stylesheet" href="testing.css" />
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/timer.css">
+  <link rel="stylesheet" href="css/utilities.css">
+  <link rel="stylesheet" href="css/cardrows.css">
 </head>
 
 <body>
-  <!-- Sticky banner with global timer -->
   <header id="banner">
     <h1>CAIRON</h1>
     <time id="globalClock" aria-live="polite">00:00</time>
   </header>
 
   <main>
-    <!-- STEP 1 · SESSION SETUP -->
     <section id="stepSession" class="card active" data-step="1">
       <h2>Crear Sesión</h2>
       <form id="sessionForm" autocomplete="off">
         <div class="grid">
-          <label>Session ID
-            <input id="sessionId" type="text"
-                   pattern="T\\d{2}-G\\d{2}"
-                   placeholder="T02-G07" required>
+    
+          <label>Número de Test
+            <input id="testNumber" type="number" min="1" max="999" placeholder="1" required>
           </label>
-          <label>Nº Jugadores
+    
+          <label>Número de Partida
+            <input id="gameNumber" type="number" min="1" max="999" placeholder="1" required>
+          </label>
+    
+          <label>ID de Sesión
+            <input id="sessionId" type="text" readonly placeholder="T000-P000">
+          </label>
+    
+          <label>Número de Jugadores
             <select id="numPlayers" required>
               <option value="" disabled selected>—</option>
               <option>2</option><option>3</option><option>4</option>
               <option>5</option><option>6</option><option>7</option><option>8</option>
             </select>
           </label>
+    
           <label>Fecha
-            <input id="sessionDate" type="date" readonly>
+            <input id="sessionDate" type="date" required>
           </label>
-          <div class="timerBlock">
-            <button id="btnSessionToggle" type="button" title="⌘/Ctrl + S">
-              Start Session
-            </button>
+    
+          <div class="timerWrapper">
+            <span class="fake-label">⠀</span> <!-- invisible label for alignment -->
+            <div class="timerBlock">
+              <button id="btnSessionToggle" type="button" title="⌘/Ctrl + S">
+                Iniciar Sesión
+              </button>
+            </div>
           </div>
         </div>
       </form>
     </section>
+    
 
-    <!-- STEP 2 · TURN LOGGING -->
+    <!-- Paso 2: Registrar Turno -->
     <section id="stepTurn" class="card" data-step="2">
       <h2>Registrar Turno</h2>
       <form id="turnForm" autocomplete="off">
-        <!-- Basic turn info -->
+        <!-- Información básica -->
         <div class="grid">
-          <label>Nº Turno
+          <label>Número de Turno
             <input id="turnNo" readonly>
           </label>
           <label>Jugador
@@ -63,79 +78,39 @@
           </label>
           <div class="timerBlock">
             <span id="turnClock">0 s</span>
-            <button id="btnTurnToggle" type="button" title="Espacio">Start</button>
+            <button id="btnTurnToggle" type="button" title="Espacio">Iniciar</button>
           </div>
         </div>
 
-        <!-- Group 1: Criatura & Efectos -->
-        <fieldset class="group">
-          <legend>Criatura & Efectos</legend>
-          <div class="grid">
-            <label class="chips">
-              <input id="completedCreature" type="checkbox">
-              Completada
-            </label>
-            <label>Efecto
-              <select id="effectActivated">
-                <option>None</option><option>Combat</option>
-                <option>Exchange</option><option>Steal</option>
-              </select>
-            </label>
-            <label>Dirección
-              <select id="effectDirection">
-                <option>Left</option><option>Right</option>
-                <option>Wild</option><option>Cancel</option>
-              </select>
-            </label>
-          </div>
+        <!-- Grupo 1: Criatura y Efectos -->
+        <fieldset class="group" id="creatureGroup">
+          <legend>Criaturas</legend>
+          <div id="creatureList"></div>
+          <button type="button" id="btnAddCreature">+ Añadir Criatura</button>
         </fieldset>
 
-        <!-- Group 2: Poderes & Desastres -->
-        <fieldset class="group">
-          <legend>Poderes & Desastres</legend>
-          <div class="grid">
-            <label class="chips">
-              <input id="miracleUsed" type="checkbox">
-              Miracle
-            </label>
-            <label class="chips">
-              <input id="prodigyUsed" type="checkbox">
-              Prodigy
-            </label>
-            <label>Desastre
-              <select id="naturalDisaster">
-                <option>None</option>
-                <optgroup label="Global">
-                  <option>Global – Earth</option>
-                  <option>Global – Water</option>
-                  <option>Global – Air</option>
-                </optgroup>
-                <optgroup label="Local">
-                  <option>Local – Earth</option>
-                  <option>Local – Water</option>
-                  <option>Local – Air</option>
-                </optgroup>
-              </select>
-            </label>
-          </div>
+        <!-- Grupo 2: Poderes y Desastres -->
+        <fieldset class="group" id="specialGroup">
+          <legend>Especiales</legend>
+          <div id="specialList"></div>
+          <button type="button" id="btnAddSpecial">+ Añadir Especial</button>
         </fieldset>
 
-        <!-- Notes at end, full width -->
+        <!-- Notas -->
         <div class="notes-block">
           <label>Notas (opcional)
-            <textarea id="turnNotes" rows="4"
-                      placeholder="Comentarios…"></textarea>
+            <textarea id="turnNotes" rows="4" placeholder="Comentarios…"></textarea>
           </label>
         </div>
 
-        <!-- Save button -->
+        <!-- Botón Guardar -->
         <button id="btnSaveTurn" class="wide" type="button" title="Enter" disabled>
           Guardar Turno
         </button>
       </form>
     </section>
 
-    <!-- HISTORY TABLE -->
+    <!-- Historial de turnos -->
     <section id="historyCard" class="card hidden">
       <h2>Historial</h2>
       <table id="turnTable">
@@ -143,16 +118,16 @@
         <tbody></tbody>
       </table>
     </section>
-
-    <!-- Floating “End Session” action button -->
-    <button id="btnEndSession" class="fab hidden" title="Fin Sesión">⏹</button>
   </main>
 
-  <!-- Toast notifications -->
+  <!-- Notificaciones -->
   <div id="toast"></div>
 
   <!-- Scripts -->
   <script src="libs/FileSaver.min.js"></script>
-  <script src="testing.js"></script>
+  <script type="module" src="scripts/main.js"></script>
 </body>
 </html>
+
+
+<!-- In Windows, refresh cache with ctrl+F5 -->

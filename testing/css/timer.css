@@ -1,0 +1,49 @@
+.timerBlock {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .timerBlock > * {
+    flex: 1 1 0;
+    height: 38px;
+    box-sizing: border-box;
+  }
+  
+  .timerBlock span {
+    font-family: 'AR Julien', sans-serif;
+    background: var(--gold);
+    color: var(--navy);
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    min-width: 70px;
+    text-align: center;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  
+  .timerBlock button {
+    height: 38px;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+  
+  .timerWrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .fake-label {
+    visibility: hidden;
+    font-weight: 600;
+    height: 1em;
+  }
+  

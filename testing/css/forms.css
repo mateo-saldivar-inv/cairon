@@ -1,0 +1,90 @@
+label {
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    padding: 8px 10px;
+    border: 1px solid #ccd;
+    border-radius: var(--radius);
+    background: #fff;
+    transition: border var(--dur), box-shadow var(--dur);
+  }
+  
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(254, 224, 0, .35);
+    outline: none;
+  }
+  
+  input[readonly] {
+    background: #eef;
+    cursor: default;
+  }
+  
+  textarea {
+    resize: vertical;
+  }
+  
+  fieldset.group {
+    position: relative;
+    margin: 1.5rem 0;
+    padding: 1.25rem 1rem 1.5rem;
+    border: 1px solid var(--navy);
+    border-radius: var(--radius);
+    background: #fff;
+  }
+  
+  fieldset.group legend {
+    padding: 0 .5rem;
+    margin-left: 1rem;
+    font-weight: bold;
+    color: var(--navy);
+    background: #fff;
+    position: absolute;
+    top: -0.75rem;
+    left: 1rem;
+  }
+  
+  fieldset.group label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .notes-block {
+    margin: 16px 0;
+  }
+  
+  .notes-block textarea {
+    width: 100%;
+    min-height: 100px;
+  }
+  
+  label.chips {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  
+  label.chips input {
+    margin: 0;
+  }
+  
+  .group-grid {
+    display: grid;
+    gap: 1rem 2rem;
+    align-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    margin-top: 0.75rem;
+  }
+  

@@ -1,0 +1,23 @@
+.hidden {
+    display: none !important;
+  }
+  
+  @media (max-width: 600px) {
+    .card {
+      padding: 20px 16px;
+      margin: 16px auto;
+    }
+  
+    .grid {
+      gap: 12px;
+    }
+  
+    #banner h1 {
+      font-size: 1.2rem;
+    }
+  
+    #globalClock {
+      font-size: 1rem;
+    }
+  }
+  
