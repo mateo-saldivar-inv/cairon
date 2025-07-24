@@ -3,8 +3,11 @@ let globalTick = null;
 let turnTick = null;
 
 function persist() {
-  localStorage.setItem('cairon.session', JSON.stringify(S));
+  if (S) {
+    localStorage.setItem('cairon.session', JSON.stringify(S));
+  }
 }
+
 
 export { S, globalTick, turnTick, persist };
 export function setS(newS) { S = newS; }

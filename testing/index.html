@@ -110,6 +110,104 @@
       </form>
     </section>
 
+    <!-- Paso 3: Fin de la Partida -->
+    <section id="endGameCard" class="card hidden" data-step="3">
+      <h2>Fin de la Partida</h2>
+    
+      <div class="grid">
+        <label>Motivo de Fin
+          <select id="endReason" required>
+            <option value="" disabled selected>—</option>
+            <option value="dragon">Dragón Completado</option>
+            <option value="nocards">Sin Cartas</option>
+          </select>
+        </label>
+      </div>
+    
+      <div id="dragonExtras" class="grid hidden" style="margin-top: 1rem;">
+        <label>Jugador que construyó el Dragón
+          <select id="dragonPlayer"></select>
+        </label>
+        <label>Valor del Dragón
+          <input type="number" min="0" id="dragonValue" />
+        </label>
+      </div>
+    
+      <div id="finalScores" class="grid" style="margin-top: 2rem;"></div>
+    
+      <div class="grid" style="margin-top: 2rem;">
+        <label>Total de Criaturas en Juego
+          <input type="number" min="0" id="totalCreatures" />
+        </label>
+        <label>Total de Cartas en Juego
+          <input type="number" min="0" id="totalCards" />
+        </label>
+      </div>
+
+      <div class="grid" style="margin-top: 2rem;">
+        <label>¿Quisieron volver a jugar?
+          <select id="replayInterest">
+            <option value="" disabled selected>—</option>
+            <option value="all">Todos los jugadores</option>
+            <option value="most">Algunos jugadores (> mitad)</option>
+            <option value="few">Pocos jugadores (< mitad)</option>
+            <option value="none">Ningún jugador</option>
+          </select>
+        </label>
+      
+        <label>¿Cómo se explicó el juego?
+          <select id="explanationMethod">
+            <option value="" disabled selected>—</option>
+            <option value="manual">Manual de instrucciones</option>
+            <option value="video">Video tutorial</option>
+            <option value="verbal">Explicación verbal</option>
+            <option value="other">Otro (describir en notas)</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="feedbackGrid" class="grid" style="margin-top: 2rem;">
+        <label>¿Usaron nombres de criaturas?
+          <select id="usedCreatureNames">
+            <option value="" disabled selected>—</option>
+            <option value="yes">Sí</option>
+            <option value="no">No</option>
+            <option value="some">Algo (ver notas)</option>
+          </select>
+        </label>
+      
+        <label>¿La partida fue divertida?
+          <select id="playerEngagement">
+            <option value="" disabled selected>—</option>
+            <option value="yes">Sí</option>
+            <option value="no">No</option>
+            <option value="some">Algo (ver notas)</option>
+          </select>
+        </label>
+      
+        <label>¿Se usó Intervención Divina?
+          <select id="usedDivineIntervention">
+            <option value="none">Nadie</option>
+            <option value="multiple">Más de uno (ver notas)</option>
+            <!-- player options will be inserted here -->
+          </select>
+        </label>
+      </div>
+
+      <div class="notes-block">
+        <label>Notas Finales (opcional)
+          <textarea id="finalNotes" rows="4" placeholder="Comentarios generales…"></textarea>
+        </label>
+      </div>
+    
+      <div style="margin-top: 1.5rem;">
+        <button id="btnSaveSession" class="wide" type="button">
+          Guardar Datos
+        </button>
+      </div>
+    </section>
+
+
     <!-- Historial de turnos -->
     <section id="historyCard" class="card hidden">
       <h2>Historial</h2>
@@ -118,13 +216,21 @@
         <tbody></tbody>
       </table>
     </section>
+
+    <!-- Export Button -->
+    <section class="card" data-step="4">
+      <h2>Exportar Datos</h2>
+      <button id="btnExport" class="wide" type="button">
+        Exportar a Backend
+      </button>
+    </section>
   </main>
 
   <!-- Notificaciones -->
   <div id="toast"></div>
 
   <!-- Scripts -->
-  <script src="libs/FileSaver.min.js"></script>
+  <script src="scripts/libs/FileSaver.min.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
 </html>
