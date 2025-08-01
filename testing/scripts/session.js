@@ -18,7 +18,7 @@ export function startSession() {
     errors.push('Número de Partida debe ser mayor que 0');
   }
 
-  if (!/^T\d{4}-P\d{3}-\d{6}$/.test(id)) {
+  if (!/^T\d{3}-P\d{3}-\d-\d{6}$/.test(id)) {
     errors.push('ID de Sesión inválido');
   }
 
@@ -78,8 +78,7 @@ export function uiAfterSessionStart() {
 
   $('sessionDate').value = S.date;
   $('btnSessionToggle').textContent = 'Concluir Sesión';
-  $('historyCard').classList.remove('hidden');
-  $('endGameCard').classList.remove('hidden');
+  $('stepTurn').classList.remove('hidden');
 
   renderScoreInputs(S.numPlayers);
 
@@ -138,11 +137,37 @@ function startGlobalTimer() {
   setGlobalTick(setInterval(tickGlobal, 1000));
 }
 
+export function saveEndGameData() {
+  const data = {
+    reason: $('endReason').value,
+    dragonPlayer: $('dragonPlayer').value,
+    dragonValue: parseInt($('dragonValue').value, 10),
+    totalCreatures: parseInt($('totalCreatures').value, 10),
+    totalCards: parseInt($('totalCards').value, 10),
+    replayInterest: $('replayInterest').value,
+    explanationMethod: $('explanationMethod').value,
+    usedCreatureNames: $('usedCreatureNames').value,
+    playerEngagement: $('playerEngagement').value,
+    usedDivineIntervention: $('usedDivineIntervention').value,
+    finalNotes: $('finalNotes').value.trim()
+  };
+
+  S.endGame = data;
+  persist();
+
+  $('endGameCard').dataset.saved = 'true';
+  document.querySelector('[data-step="4"]').classList.remove('hidden'); // Export section
+  toast('Datos de fin de partida guardados');
+}
+
 export function exportData() {
   if (!S) return toast('No hay sesión activa.');
   localExport(S);
   toast('Datos exportados localmente');
+
+  const sessionId = S.id;
   stopSession();
+  location.href = `thanks.html?id=${encodeURIComponent(sessionId)}`;
 }
 
 //Replace with server export
@@ -152,3 +177,4 @@ function localExport(data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   saveAs(blob, filename); 
 }
+

@@ -3,20 +3,23 @@ import { S, persist } from './state.js';
 import { toggleSession, uiAfterSessionStart } from './session.js';
 import { toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow } from './turns.js';
 import { setupKeyboardShortcuts } from './events.js';
-import { exportData } from './session.js';
+import { exportData, saveEndGameData } from './session.js';
 
 const pad = (n, d) => String(n || 0).padStart(d, '0');
 
 function updateSessionId() {
   const t = $('testNumber').value;
   const g = $('gameNumber').value;
-  const dateISO = ($('sessionDate').value || today()); 
-  const mm   = dateISO.slice(5, 7);
-  const dd   = dateISO.slice(8,10);
-  const yy   = dateISO.slice(2,4);                    
-  $('sessionId').value = `T${pad(t,4)}-P${pad(g,3)}-${mm}${dd}${yy}`;
-}
+  const p = $('numPlayers').value;
+  const dateISO = ($('sessionDate').value || today());
+  const mm = dateISO.slice(5, 7);
+  const dd = dateISO.slice(8, 10);
+  const yy = dateISO.slice(2, 4);
 
+  if (!t || !g || !p) return;
+
+  $('sessionId').value = `T${pad(t, 3)}-P${pad(g, 3)}-${p}-${mm}${dd}${yy}`;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   if (S) {
@@ -28,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('testNumber').addEventListener('input', updateSessionId);
   $('gameNumber').addEventListener('input', updateSessionId);
+  $('numPlayers').addEventListener('change', updateSessionId);
   updateSessionId(); 
 
   $('btnSessionToggle').onclick = toggleSession;
@@ -51,8 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
     $('dragonExtras').classList.toggle('hidden', !isDragon);
   });
   
-  $('btnSaveSession').onclick = persist;
+  $('btnSaveSession').onclick = saveEndGameData;
   $('btnExport').onclick = exportData;
+
+  $('btnOpenBoardForm').onclick = () => {
+    if (!S?.id) {
+      toast('ID de sesión no disponible');
+      return;
+    }
+  
+    const url = `https://docs.google.com/forms/d/e/1FAIpQLSfj0a9mb1Tf5CWccLUBd0bj_-RgxgxKto9hpG4Z3FACEgiAPA/viewform?usp=pp_url&entry.2103469228=${encodeURIComponent(S.id)}`;
+    window.open(url, '_blank');
+  };
 
   setupKeyboardShortcuts();
 });

@@ -78,13 +78,14 @@ export function saveTurn() {
   stopTurn();
   $('turnClock').textContent = '0 s';
   $('turnNotes').value = '';
-  ['effectActivated', 'effectDirection', 'naturalDisaster'].forEach(id => $(id).selectedIndex = 0);
   $('btnSaveTurn').disabled = true;
 
   $('creatureList').innerHTML = '';
   const sel = $('playerSelect');
   sel.selectedIndex = (sel.selectedIndex + 1) % sel.options.length;
   updateTurnNo();
+  $('historyCard').classList.remove('hidden');
+  $('endGameCard').classList.remove('hidden');
 }
 
 export function createCreatureBlock(index) {

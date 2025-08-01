@@ -65,7 +65,7 @@
     
 
     <!-- Paso 2: Registrar Turno -->
-    <section id="stepTurn" class="card" data-step="2">
+    <section id="stepTurn" class="card hidden" data-step="2">
       <h2>Registrar Turno</h2>
       <form id="turnForm" autocomplete="off">
         <!-- Información básica -->
@@ -108,6 +108,15 @@
           Guardar Turno
         </button>
       </form>
+    </section>
+
+    <!-- Historial de turnos -->
+    <section id="historyCard" class="card hidden">
+      <h2>Historial</h2>
+      <table id="turnTable">
+        <thead></thead>
+        <tbody></tbody>
+      </table>
     </section>
 
     <!-- Paso 3: Fin de la Partida -->
@@ -200,25 +209,19 @@
         </label>
       </div>
     
-      <div style="margin-top: 1.5rem;">
+      <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
         <button id="btnSaveSession" class="wide" type="button">
           Guardar Datos
+        </button>
+        <button id="btnOpenBoardForm" class="wide" type="button">
+          Estado final del tablero
         </button>
       </div>
     </section>
 
 
-    <!-- Historial de turnos -->
-    <section id="historyCard" class="card hidden">
-      <h2>Historial</h2>
-      <table id="turnTable">
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </section>
-
     <!-- Export Button -->
-    <section class="card" data-step="4">
+    <section class="card hidden" data-step="4">
       <h2>Exportar Datos</h2>
       <button id="btnExport" class="wide" type="button">
         Exportar a Backend
