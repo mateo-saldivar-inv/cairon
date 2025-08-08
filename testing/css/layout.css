@@ -39,17 +39,24 @@ html, body {
   }
   
 
-  #finalScores {
-    display: block; 
-  }
-  
-  .player-final-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-  .player-final-row label {
-    display: flex;
-    flex-direction: column;
-  }
+#finalScores { display: block; }
+
+.player-final-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.player-final-row label { display: flex; flex-direction: column; min-width: 0; }
+.player-final-row input { width: 100%; min-width: 0; }
+
+@media (max-width: 560px) {
+  .player-final-row { gap: 0.5rem; }
+  .player-final-row label { font-size: 0.95rem; }
+  .player-final-row input { padding: 6px 8px; }
+}
+
+@media (max-width: 420px) {
+  .player-final-row { grid-template-columns: 1fr; }
+}
