@@ -81,6 +81,8 @@ export function saveTurn() {
   $('btnSaveTurn').disabled = true;
 
   $('creatureList').innerHTML = '';
+  $('specialList').innerHTML = '';
+
   const sel = $('playerSelect');
   sel.selectedIndex = (sel.selectedIndex + 1) % sel.options.length;
   updateTurnNo();

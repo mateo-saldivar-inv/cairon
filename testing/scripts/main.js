@@ -1,9 +1,9 @@
 import { $, today } from './utils.js';
 import { S, persist } from './state.js';
 import { toggleSession, uiAfterSessionStart } from './session.js';
-import { toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow } from './turns.js';
+import { updateTurnNo, toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow } from './turns.js';
 import { setupKeyboardShortcuts } from './events.js';
-import { exportData, saveEndGameData } from './session.js';
+import { exportData, saveEndGameData, showPausedTime, populateDivineInterventionOptions } from './session.js';
 
 const pad = (n, d) => String(n || 0).padStart(d, '0');
 
@@ -23,8 +23,11 @@ function updateSessionId() {
 
 document.addEventListener('DOMContentLoaded', () => {
   if (S) {
-    uiAfterSessionStart();
-    S.turns.forEach(insertRow);
+    if (S.paused) {
+      restorePausedSession();
+    } else {
+      restoreActiveSession();
+    }
   }
 
   $('sessionDate').value = today();
@@ -70,3 +73,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupKeyboardShortcuts();
 });
+
+
+function restoreSessionFormFields() {
+  $('sessionDate').value = S.date;
+  $('testNumber').value = parseInt(S.id.slice(1, 4), 10);
+  $('gameNumber').value = parseInt(S.id.slice(6, 9), 10);
+  $('numPlayers').value = String(S.numPlayers);
+  updateSessionId();
+}
+
+function restorePausedSession() {
+  restoreSessionFormFields();
+  $('btnSessionToggle').textContent = 'Reanudar Sesión';
+  $('stepTurn').classList.add('hidden');
+  $('historyCard').classList.add('hidden');
+  $('endGameCard').classList.add('hidden');
+
+  showPausedTime();
+}
+
+function restoreActiveSession() {
+  restoreSessionFormFields();
+  uiAfterSessionStart();
+  populateDivineInterventionOptions();
+
+  if (S.turns?.length > 0) {
+    S.turns.forEach(insertRow);
+    $('historyCard').classList.remove('hidden');
+    $('endGameCard').classList.remove('hidden');
+  }
+
+  if (S.finalData) {
+    import('./session.js').then(({ populateFinalData }) => {
+      populateFinalData(S.finalData);
+    });
+    $('endGameCard').classList.remove('hidden');
+    document.querySelector('[data-step="4"]')?.classList.remove('hidden');
+  }
+
+  updateTurnNo();
+}

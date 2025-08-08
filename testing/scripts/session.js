@@ -40,14 +40,15 @@ export function startSession() {
     numPlayers: num,
     date,
     start: Date.now(),
-    turns: []
+    turns: [],
+    paused: false,
+    pauseTime: null  
   });
 
   persist();
   uiAfterSessionStart();
   populateDivineInterventionOptions();
 }
-
 
 export function stopSession() {
   clearInterval(globalTick);
@@ -66,7 +67,61 @@ export function stopSession() {
 
 export function toggleSession() {
   if (!S) startSession();
-  else    stopSession();
+  else if (!S.paused) pauseSession();
+  else resumeSession();
+}
+
+export function pauseSession() {
+  S.paused = true;
+  S.pauseTime = Date.now();
+  persist();
+
+  clearInterval(globalTick);
+  setGlobalTick(null);
+
+  $('stepTurn').classList.add('hidden');
+  $('historyCard').classList.add('hidden');
+  $('endGameCard').classList.add('hidden');
+  $('btnSessionToggle').textContent = 'Reanudar Sesión';
+
+  showPausedTime();
+
+  const turnClock = $('turnClock');
+  if (turnClock.dataset.running === 'true') {
+    turnClock.dataset.pausedAt = Date.now();
+  }
+
+  toast('Sesión pausada');
+}
+
+export function resumeSession() {
+  if (!S.paused || !S.pauseTime) return;
+
+  const pausedDuration = Date.now() - S.pauseTime;
+  S.start += pausedDuration; 
+  if (S._turnStart) S._turnStart += pausedDuration; 
+
+  S.paused = false;
+  S.pauseTime = null;
+  persist();
+
+  uiAfterSessionStart();
+
+  startGlobalTimer();
+  $('btnSessionToggle').textContent = 'Pausar Sesión';
+
+  $('stepTurn').classList.remove('hidden');
+  if (S.turns.length > 0) $('historyCard').classList.remove('hidden');
+  if (S.finalData) $('endGameCard').classList.remove('hidden');
+
+  const turnClock = $('turnClock');
+  if (turnClock.dataset.pausedAt) {
+    const pauseDur = Date.now() - parseInt(turnClock.dataset.pausedAt, 10);
+    S._turnStart += pauseDur;
+    delete turnClock.dataset.pausedAt;
+  }
+
+  toast('Sesión reanudada');
 }
 
 export function uiAfterSessionStart() {
@@ -77,7 +132,7 @@ export function uiAfterSessionStart() {
   $('playerSelect').innerHTML = opts.map(p => `<option>${p}</option>`).join('');
 
   $('sessionDate').value = S.date;
-  $('btnSessionToggle').textContent = 'Concluir Sesión';
+  $('btnSessionToggle').textContent = 'Pausar Sesión';
   $('stepTurn').classList.remove('hidden');
 
   renderScoreInputs(S.numPlayers);
@@ -85,7 +140,7 @@ export function uiAfterSessionStart() {
   startGlobalTimer();
 }
 
-function populateDivineInterventionOptions() {
+export function populateDivineInterventionOptions() {
   const select = $('usedDivineIntervention');
   if (!select) return;
 
@@ -102,12 +157,18 @@ function populateDivineInterventionOptions() {
   }
 }
 
-
 function tickGlobal() {
   const elapsed = Math.floor((Date.now() - S.start) / 1000);
   const m = Math.floor(elapsed / 60);
   const s = elapsed % 60;
   $('globalClock').textContent = `${pad2(m)}:${pad2(s)}`;
+}
+
+export function showPausedTime() {
+  const elapsed = Math.floor((S.pauseTime - S.start) / 1000);
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  $('globalClock').textContent = `⏸️ ${pad2(m)}:${pad2(s)}`;
 }
 
 function renderScoreInputs(n) {
@@ -130,7 +191,58 @@ function renderScoreInputs(n) {
   }
 }
 
+// ✅ COLLECT FINAL DATA
+function collectFinalData() {
+  const get = id => $(id)?.value;
+  const obj = {
+    endReason: get('endReason'),
+    dragonPlayer: get('dragonPlayer'),
+    dragonValue: get('dragonValue'),
+    totalCreatures: get('totalCreatures'),
+    totalCards: get('totalCards'),
+    replayInterest: get('replayInterest'),
+    explanationMethod: get('explanationMethod'),
+    usedCreatureNames: get('usedCreatureNames'),
+    playerEngagement: get('playerEngagement'),
+    usedDivineIntervention: get('usedDivineIntervention'),
+    finalNotes: get('finalNotes'),
+    scores: []
+  };
 
+  const scoreInputs = document.querySelectorAll('[name^="finalScore-"]');
+  scoreInputs.forEach(input => {
+    const name = input.name.replace('finalScore-', '');
+    obj.scores.push({ player: name, score: input.value });
+  });
+
+  return obj;
+}
+
+// ✅ POPULATE FINAL DATA
+export function populateFinalData(data) {
+  const set = (id, val) => { const el = $(id); if (el) el.value = val; };
+
+  set('endReason', data.endReason);
+  set('dragonPlayer', data.dragonPlayer);
+  set('dragonValue', data.dragonValue);
+  set('totalCreatures', data.totalCreatures);
+  set('totalCards', data.totalCards);
+  set('replayInterest', data.replayInterest);
+  set('explanationMethod', data.explanationMethod);
+  set('usedCreatureNames', data.usedCreatureNames);
+  set('playerEngagement', data.playerEngagement);
+  set('usedDivineIntervention', data.usedDivineIntervention);
+  set('finalNotes', data.finalNotes);
+
+  data.scores?.forEach(s => {
+    const el = document.querySelector(`[name="finalScore-${s.player}"]`);
+    if (el) el.value = s.score;
+  });
+
+  if (data.endReason === 'dragon') {
+    $('dragonExtras').classList.remove('hidden');
+  }
+}
 
 function startGlobalTimer() {
   tickGlobal();
@@ -138,21 +250,8 @@ function startGlobalTimer() {
 }
 
 export function saveEndGameData() {
-  const data = {
-    reason: $('endReason').value,
-    dragonPlayer: $('dragonPlayer').value,
-    dragonValue: parseInt($('dragonValue').value, 10),
-    totalCreatures: parseInt($('totalCreatures').value, 10),
-    totalCards: parseInt($('totalCards').value, 10),
-    replayInterest: $('replayInterest').value,
-    explanationMethod: $('explanationMethod').value,
-    usedCreatureNames: $('usedCreatureNames').value,
-    playerEngagement: $('playerEngagement').value,
-    usedDivineIntervention: $('usedDivineIntervention').value,
-    finalNotes: $('finalNotes').value.trim()
-  };
-
-  S.endGame = data;
+  const data = collectFinalData();
+  S.finalData = data;
   persist();
 
   $('endGameCard').dataset.saved = 'true';
@@ -166,7 +265,7 @@ export function exportData() {
   toast('Datos exportados localmente');
 
   const sessionId = S.id;
-  stopSession();
+  stopSession(); // includes clearing session + localStorage
   location.href = `thanks.html?id=${encodeURIComponent(sessionId)}`;
 }
 
@@ -177,4 +276,3 @@ function localExport(data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   saveAs(blob, filename); 
 }
-
