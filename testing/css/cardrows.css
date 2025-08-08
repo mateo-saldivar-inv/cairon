@@ -16,6 +16,7 @@
   .creature-row select,
   .creature-row button {
     height: 38px;
+    min-width: 0; 
     box-sizing: border-box;
   }
   

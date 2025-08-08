@@ -1,7 +1,7 @@
 import { $, today } from './utils.js';
 import { S, persist } from './state.js';
 import { toggleSession, uiAfterSessionStart } from './session.js';
-import { updateTurnNo, toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow } from './turns.js';
+import { updateTurnNo, toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow, restoreTurnDraft } from './turns.js';
 import { setupKeyboardShortcuts } from './events.js';
 import { exportData, saveEndGameData, showPausedTime, populateDivineInterventionOptions } from './session.js';
 
@@ -89,6 +89,7 @@ function restorePausedSession() {
   $('stepTurn').classList.add('hidden');
   $('historyCard').classList.add('hidden');
   $('endGameCard').classList.add('hidden');
+  updateTurnNo();
 
   showPausedTime();
 }
@@ -112,5 +113,9 @@ function restoreActiveSession() {
     document.querySelector('[data-step="4"]')?.classList.remove('hidden');
   }
 
-  updateTurnNo();
+  if (S.draftTurn) {
+    restoreTurnDraft();
+  } else {
+    updateTurnNo();
+  }
 }

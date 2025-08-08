@@ -1,5 +1,6 @@
 import { $, pad2, toast } from './utils.js';
 import { S, persist, setS, globalTick, setGlobalTick } from './state.js';
+import { snapshotTurnDraft, restoreTurnDraft, updateTurnNo } from './turns.js';
 
 export function startSession() {
   const test = parseInt($('testNumber').value, 10);
@@ -74,6 +75,9 @@ export function toggleSession() {
 export function pauseSession() {
   S.paused = true;
   S.pauseTime = Date.now();
+
+  snapshotTurnDraft(!!S._turnStart); 
+
   persist();
 
   clearInterval(globalTick);
@@ -86,11 +90,6 @@ export function pauseSession() {
 
   showPausedTime();
 
-  const turnClock = $('turnClock');
-  if (turnClock.dataset.running === 'true') {
-    turnClock.dataset.pausedAt = Date.now();
-  }
-
   toast('Sesión pausada');
 }
 
@@ -98,8 +97,8 @@ export function resumeSession() {
   if (!S.paused || !S.pauseTime) return;
 
   const pausedDuration = Date.now() - S.pauseTime;
-  S.start += pausedDuration; 
-  if (S._turnStart) S._turnStart += pausedDuration; 
+  S.start += pausedDuration;
+  if (S._turnStart) S._turnStart += pausedDuration;
 
   S.paused = false;
   S.pauseTime = null;
@@ -114,15 +113,11 @@ export function resumeSession() {
   if (S.turns.length > 0) $('historyCard').classList.remove('hidden');
   if (S.finalData) $('endGameCard').classList.remove('hidden');
 
-  const turnClock = $('turnClock');
-  if (turnClock.dataset.pausedAt) {
-    const pauseDur = Date.now() - parseInt(turnClock.dataset.pausedAt, 10);
-    S._turnStart += pauseDur;
-    delete turnClock.dataset.pausedAt;
-  }
+  restoreTurnDraft();
 
   toast('Sesión reanudada');
 }
+
 
 export function uiAfterSessionStart() {
   $('stepSession').classList.remove('active');
@@ -136,6 +131,7 @@ export function uiAfterSessionStart() {
   $('stepTurn').classList.remove('hidden');
 
   renderScoreInputs(S.numPlayers);
+  updateTurnNo();
 
   startGlobalTimer();
 }

@@ -7,11 +7,17 @@ export function toggleTurnTimer() {
 }
 
 function startTurn() {
-  S._turnStart = Date.now();
+  const prevElapsed = (S?.draftTurn?.elapsed || 0);
+
+  S._turnStart = Date.now() - (prevElapsed * 1000);
+
   $('btnTurnToggle').textContent = 'Detener';
   $('btnSaveTurn').disabled = true;
+
   tickTurn();
   setTurnTick(setInterval(tickTurn, 1000));
+
+  snapshotTurnDraft(true);
 }
 
 function tickTurn() {
@@ -24,6 +30,8 @@ function stopTurn() {
   setTurnTick(null);
   $('btnTurnToggle').textContent = 'Iniciar';
   $('btnSaveTurn').disabled = false;
+
+  snapshotTurnDraft(false);
 }
 
 export function updateTurnNo() {
@@ -61,21 +69,29 @@ export function saveTurn() {
     };
   });
 
+  const duration = S._turnStart ? Math.floor((Date.now() - S._turnStart) / 1000) : (S?.draftTurn?.elapsed || 0);
+
   const t = {
     turnNo: S.turns.length + 1,
     player: $('playerSelect').value,
-    duration: Math.floor((Date.now() - S._turnStart) / 1000),
+    duration,
     creatures,
     specials,
     notes: $('turnNotes').value.trim()
   };
 
   S.turns.push(t);
+  if (S.draftTurn) delete S.draftTurn;
   persist();
+
   insertRow(t);
   toast(`Turno ${t.turnNo} guardado`);
 
-  stopTurn();
+  clearInterval(turnTick);
+  setTurnTick(null);
+  S._turnStart = null;
+
+  $('btnTurnToggle').textContent = 'Iniciar';
   $('turnClock').textContent = '0 s';
   $('turnNotes').value = '';
   $('btnSaveTurn').disabled = true;
@@ -337,4 +353,112 @@ function protFull(p) {
 
 function capitalize(str = '') {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+
+function collectTurnForm() {
+  const player = $('playerSelect')?.value || '';
+  const notes = $('turnNotes')?.value?.trim() || '';
+
+  const creatures = Array.from(document.querySelectorAll('.creature-entry, .creature-row')).map(entry => {
+    const i = entry.dataset.index;
+    return {
+      name: entry.querySelector(`[name="creatureName-${i}"]`)?.value?.trim() || '',
+      effect: entry.querySelector(`[name="creatureEffect-${i}"]`)?.value || 'Ninguno',
+      direction: entry.querySelector(`[name="creatureDirection-${i}"]`)?.value || 'Libre',
+      targetPlayer: entry.querySelector(`[name="creatureTarget-${i}"]`)?.value || 'P1'
+    };
+  });
+
+  const specials = Array.from(document.querySelectorAll('.special-row')).map(r => {
+    const i = r.dataset.index;
+    const type = r.querySelector(`[name="specType-${i}"]`)?.value || 'desastre';
+    if (type === 'proteccion') {
+      return {
+        type,
+        kind: r.querySelector(`[name="specKind-${i}"]`)?.value || 'milagro',
+        player: r.querySelector(`[name="specTarget-${i}"]`)?.value || 'P1'
+      };
+    }
+    return {
+      type,
+      scope: r.querySelector(`[name="specScope-${i}"]`)?.value || 'global',
+      element: r.querySelector(`[name="specElement-${i}"]`)?.value || 'tierra',
+      target: r.querySelector(`[name="specTarget-${i}"]`)?.value || 'all'
+    };
+  });
+
+  return { player, notes, creatures, specials };
+}
+
+function currentElapsedSec() {
+  if (S?._turnStart) return Math.floor((Date.now() - S._turnStart) / 1000);
+  return S?.draftTurn?.elapsed || 0;
+}
+
+export function snapshotTurnDraft(runningFlag) {
+  if (!S) return;
+
+  const elapsed = currentElapsedSec();
+  const form = collectTurnForm();
+
+  S.draftTurn = {
+    ...form,
+    elapsed,
+    running: !!runningFlag
+  };
+  persist();
+}
+
+export function restoreTurnDraft() {
+  if (!S?.draftTurn) return;
+
+  const d = S.draftTurn;
+
+  if ($('playerSelect')) $('playerSelect').value = d.player || $('playerSelect').value;
+  if ($('turnNotes')) $('turnNotes').value = d.notes || '';
+
+  $('creatureList').innerHTML = '';
+  (d.creatures || []).forEach((c, idx) => {
+    const el = createCreatureBlock(idx);
+    el.querySelector(`[name="creatureName-${idx}"]`).value = c.name || '';
+    el.querySelector(`[name="creatureEffect-${idx}"]`).value = c.effect || 'Ninguno';
+    el.querySelector(`[name="creatureDirection-${idx}"]`).value = c.direction || 'Libre';
+    el.querySelector(`[name="creatureDirection-${idx}"]`).dispatchEvent(new Event('change'));
+    el.querySelector(`[name="creatureTarget-${idx}"]`).value = c.targetPlayer || 'P1';
+    $('creatureList').appendChild(el);
+  });
+
+  $('specialList').innerHTML = '';
+  (d.specials || []).forEach((s, idx) => {
+    const el = createSpecialRow(idx);
+    el.querySelector(`.spec-type`).value = s.type || 'desastre';
+    el.querySelector(`.spec-type`).dispatchEvent(new Event('change'));
+
+    if (s.type === 'proteccion') {
+      el.querySelector(`[name="specKind-${idx}"]`).value = s.kind || 'milagro';
+      el.querySelector(`[name="specTarget-${idx}"]`).value = s.player || 'P1';
+    } else {
+      el.querySelector(`[name="specScope-${idx}"]`).value = s.scope || 'global';
+      el.querySelector(`[name="specElement-${idx}"]`).value = s.element || 'tierra';
+      el.querySelector(`[name="specTarget-${idx}"]`).value = s.target || 'all';
+      el.querySelector(`.spec-scope`).dispatchEvent(new Event('change'));
+    }
+
+    $('specialList').appendChild(el);
+  });
+
+  if (d.running) {
+    S._turnStart = Date.now() - (d.elapsed * 1000);
+    $('btnTurnToggle').textContent = 'Detener';
+    $('btnSaveTurn').disabled = true;
+    tickTurn();
+    setTurnTick(setInterval(tickTurn, 1000));
+  } else {
+    $('turnClock').textContent = `${d.elapsed || 0} s`;
+    $('btnTurnToggle').textContent = 'Iniciar';
+    $('btnSaveTurn').disabled = (d.elapsed || d.creatures?.length || d.specials?.length || d.notes) ? false : true;
+  }
+
+  updateTurnNo();
 }
