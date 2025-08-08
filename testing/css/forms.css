@@ -89,3 +89,14 @@ label {
     margin-top: 0.75rem;
   }
   
+  #turnTable th,
+  #turnTable td {
+    display: table-cell;
+  }
+  
+  @media (max-width: 600px) {
+    #turnTable th:nth-child(n+4),
+    #turnTable td:nth-child(n+4) {
+      display: none;
+    }
+  }
