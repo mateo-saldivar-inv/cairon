@@ -2,6 +2,8 @@ import { $, pad2, toast } from './utils.js';
 import { S, persist, setS, globalTick, setGlobalTick } from './state.js';
 import { snapshotTurnDraft, restoreTurnDraft, updateTurnNo } from './turns.js';
 
+             
+
 export function startSession() {
   const test = parseInt($('testNumber').value, 10);
   const game = parseInt($('gameNumber').value, 10);
@@ -113,6 +115,7 @@ export function resumeSession() {
   if (S.turns.length > 0) $('historyCard').classList.remove('hidden');
   if (S.finalData) $('endGameCard').classList.remove('hidden');
 
+
   restoreTurnDraft();
 
   toast('Sesión reanudada');
@@ -169,54 +172,78 @@ export function showPausedTime() {
 
 function renderScoreInputs(n) {
   const scores = $('finalScores');
+
   const playerOptions = Array.from({ length: n }, (_, i) => {
     const p = `P${pad2(i + 1)}`;
     return `<option value="${p}">${p}</option>`;
   }).join('');
 
   scores.innerHTML = '';
+
   $('dragonPlayer').innerHTML = `<option value="" disabled selected>—</option>` + playerOptions;
 
+  const rows = [];
   for (let i = 1; i <= n; i++) {
     const p = `P${pad2(i)}`;
-    scores.innerHTML += `
-      <label>${p} – Puntos
-        <input type="number" min="0" name="finalScore-${p}" />
-      </label>
-    `;
+    rows.push(`
+      <div class="player-final-row" data-player="${p}"
+           style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;align-items:end;">
+        <label>${p} – Puntos
+          <input type="number" min="0" name="finalScore-${p}" />
+        </label>
+        <label> Creaturas Completas
+          <input type="number" min="0" name="finalComplete-${p}" />
+        </label>
+        <label>Creaturas Incompletas
+          <input type="number" min="0" name="finalIncomplete-${p}" />
+        </label>
+      </div>
+    `);
   }
+  scores.innerHTML = rows.join('');
 }
+
 
 // ✅ COLLECT FINAL DATA
 function collectFinalData() {
   const get = id => $(id)?.value;
+  const toIntSel = sel => {
+    const v = document.querySelector(sel)?.value;
+    const n = parseInt(v, 10);
+    return Number.isFinite(n) ? n : 0;
+  };
+
   const obj = {
     endReason: get('endReason'),
     dragonPlayer: get('dragonPlayer'),
-    dragonValue: get('dragonValue'),
-    totalCreatures: get('totalCreatures'),
-    totalCards: get('totalCards'),
+    dragonValue: parseInt(get('dragonValue'), 10) || 0,
+    totalCreatures: parseInt(get('totalCreatures'), 10) || 0,
+    totalCards: parseInt(get('totalCards'), 10) || 0,
     replayInterest: get('replayInterest'),
     explanationMethod: get('explanationMethod'),
     usedCreatureNames: get('usedCreatureNames'),
     playerEngagement: get('playerEngagement'),
     usedDivineIntervention: get('usedDivineIntervention'),
-    finalNotes: get('finalNotes'),
+    finalNotes: (get('finalNotes') || '').trim(),
     scores: []
   };
 
-  const scoreInputs = document.querySelectorAll('[name^="finalScore-"]');
-  scoreInputs.forEach(input => {
-    const name = input.name.replace('finalScore-', '');
-    obj.scores.push({ player: name, score: input.value });
-  });
+  for (let i = 1; i <= S.numPlayers; i++) {
+    const p = `P${pad2(i)}`;
+    obj.scores.push({
+      player: p,
+      score: toIntSel(`[name="finalScore-${p}"]`),
+      complete: toIntSel(`[name="finalComplete-${p}"]`),
+      incomplete: toIntSel(`[name="finalIncomplete-${p}"]`)
+    });
+  }
 
   return obj;
 }
 
-// ✅ POPULATE FINAL DATA
+
 export function populateFinalData(data) {
-  const set = (id, val) => { const el = $(id); if (el) el.value = val; };
+  const set = (id, val) => { const el = $(id); if (el != null) el.value = val ?? el.value; };
 
   set('endReason', data.endReason);
   set('dragonPlayer', data.dragonPlayer);
@@ -230,15 +257,20 @@ export function populateFinalData(data) {
   set('usedDivineIntervention', data.usedDivineIntervention);
   set('finalNotes', data.finalNotes);
 
+  // Fill per-player fields if present (backwards compatible)
   data.scores?.forEach(s => {
-    const el = document.querySelector(`[name="finalScore-${s.player}"]`);
-    if (el) el.value = s.score;
+    const p = s.player;
+    const setSel = (sel, val) => { const el = document.querySelector(sel); if (el) el.value = val ?? el.value; };
+    setSel(`[name="finalScore-${p}"]`, s.score);
+    setSel(`[name="finalComplete-${p}"]`, s.complete);
+    setSel(`[name="finalIncomplete-${p}"]`, s.incomplete);
   });
 
   if (data.endReason === 'dragon') {
     $('dragonExtras').classList.remove('hidden');
   }
 }
+
 
 function startGlobalTimer() {
   tickGlobal();
@@ -254,6 +286,16 @@ export function saveEndGameData() {
   document.querySelector('[data-step="4"]').classList.remove('hidden'); // Export section
   toast('Datos de fin de partida guardados');
 }
+
+export function deleteSessionNow(silent = false) {
+  clearInterval(globalTick);
+  setGlobalTick(null);
+  setS(null);
+  localStorage.removeItem('cairon.session');
+  if (!silent) toast('Sesión eliminada');
+  location.href = '/testing';
+}
+
 
 export function exportData() {
   if (!S) return toast('No hay sesión activa.');

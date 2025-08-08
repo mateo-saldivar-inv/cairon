@@ -3,7 +3,7 @@ import { S, persist } from './state.js';
 import { toggleSession, uiAfterSessionStart } from './session.js';
 import { updateTurnNo, toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow, restoreTurnDraft } from './turns.js';
 import { setupKeyboardShortcuts } from './events.js';
-import { exportData, saveEndGameData, showPausedTime, populateDivineInterventionOptions } from './session.js';
+import { exportData, saveEndGameData, showPausedTime, populateDivineInterventionOptions, deleteSessionNow } from './session.js';
 
 const pad = (n, d) => String(n || 0).padStart(d, '0');
 
@@ -60,13 +60,29 @@ document.addEventListener('DOMContentLoaded', () => {
   
   $('btnSaveSession').onclick = saveEndGameData;
   $('btnExport').onclick = exportData;
+  $('btnDeleteSession').onclick = () => {
+    $('deleteDialog').classList.remove('hidden');
+    $('chkConfirmDelete').checked = false;
+    $('btnConfirmDelete').disabled = true;
+  };
 
+  $('chkConfirmDelete').onchange = () => {
+    $('btnConfirmDelete').disabled = !$('chkConfirmDelete').checked;
+  };
+
+  $('btnCancelDelete').onclick = () => {
+    $('deleteDialog').classList.add('hidden');
+  };
+
+  $('btnConfirmDelete').onclick = () => {
+    $('deleteDialog').classList.add('hidden');
+    deleteSessionNow(true);
+  };
   $('btnOpenBoardForm').onclick = () => {
     if (!S?.id) {
       toast('ID de sesión no disponible');
       return;
     }
-  
     const url = `https://docs.google.com/forms/d/e/1FAIpQLSfj0a9mb1Tf5CWccLUBd0bj_-RgxgxKto9hpG4Z3FACEgiAPA/viewform?usp=pp_url&entry.2103469228=${encodeURIComponent(S.id)}`;
     window.open(url, '_blank');
   };

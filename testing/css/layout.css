@@ -38,3 +38,18 @@ html, body {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
   
+
+  #finalScores {
+    display: block; 
+  }
+  
+  .player-final-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .player-final-row label {
+    display: flex;
+    flex-direction: column;
+  }

@@ -20,8 +20,26 @@
     <h1>CAIRON</h1>
     <time id="globalClock" aria-live="polite">00:00</time>
   </header>
-
+  
   <main>
+    <button id="btnDeleteSession" class="fab fab-left" title="Eliminar sesión" aria-label="Eliminar sesión">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 6v18h18v-18h-18zm5 14c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm5 0c0 .552-.448 1-1 1s-1-.448-1-1v-10c0-.552.448-1 1-1s1 .448 1 1v10zm4-18v2h-20v-2h5.711c.9 0 1.631-1.099 1.631-2h5.315c0 .901.73 2 1.631 2h5.712z"/>
+      </svg>
+    </button>
+    <div id="deleteDialog" class="modal hidden" aria-modal="true" role="dialog">
+      <div class="modal-card">
+        <h3>Eliminar sesión</h3>
+        <p>Esto borrará todos los datos no exportados.</p>
+        <label class="chips" style="margin: .5rem 0;">
+          <input type="checkbox" id="chkConfirmDelete"> Entiendo y quiero borrar
+        </label>
+        <div class="actions">
+          <button id="btnCancelDelete" type="button">Cancelar</button>
+          <button id="btnConfirmDelete" type="button" disabled>Eliminar</button>
+        </div>
+      </div>
+    </div>
     <section id="stepSession" class="card active" data-step="1">
       <h2>Crear Sesión</h2>
       <form id="sessionForm" autocomplete="off">

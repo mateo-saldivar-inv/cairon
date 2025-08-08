@@ -61,24 +61,38 @@
     position: fixed;
     right: 24px;
     bottom: 24px;
-    width: 56px;
-    height: 56px;
+    width: 39px; 
+    height: 39px;
     border-radius: 50%;
     background: var(--gold);
     color: var(--navy);
+    display: flex;       
+    align-items: center;
+    justify-content: center;
     font-size: 1.4rem;
     border: none;
     box-shadow: 0 3px 10px rgba(0,0,0,.25);
     cursor: pointer;
     transition: background var(--dur), transform var(--dur);
+    padding: 0;              
   }
-  
+
+  .fab svg {
+    width: 20px;   
+    height: 20px;
+  }
+
   .fab:hover {
     background: #ffd83b;
   }
   
   .fab:active {
     transform: scale(.94);
+  }
+
+  .fab-left {
+    left: 24px;
+    right: auto;
   }
   
   #toast {
@@ -144,3 +158,38 @@
     color: #2980b9;
   }
   
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: grid;
+  place-items: center;
+  z-index: 200;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 16px;
+  width: min(92vw, 420px);
+  box-shadow: 0 6px 24px rgba(0,0,0,.25);
+}
+
+.modal-card h3 {
+  margin: 0 0 .5rem;
+  color: var(--navy);
+}
+
+.modal-card .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  margin-top: .75rem;
+}
+
+#btnConfirmDelete {
+  background: #e53935;
+  color: #fff;
+}
+#btnConfirmDelete:not([disabled]):hover { background: #d32f2f; }
