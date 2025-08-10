@@ -297,15 +297,28 @@ export function deleteSessionNow(silent = false) {
 }
 
 
-export function exportData() {
+export async function exportData() {
   if (!S) return toast('No hay sesión activa.');
-  localExport(S);
-  toast('Datos exportados localmente');
+  const id = S.id;
+  const btn = $('btnExport');
+  if (btn) btn.disabled = true;
 
-  const sessionId = S.id;
-  stopSession(); // includes clearing session + localStorage
-  location.href = `thanks.html?id=${encodeURIComponent(sessionId)}`;
+  try {
+    await sendGameSession(S);
+    toast('Datos enviados');
+    stopSession();
+    window.location.assign(`thanks.html?id=${encodeURIComponent(id)}`);
+  } catch (err) {
+    console.error(err);
+    toast('Error al enviar. Guardando localmente…');
+    localExport(S);
+    stopSession();
+    window.location.assign(`thanks.html?id=${encodeURIComponent(id)}`);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
+
 
 //Replace with server export
 function localExport(data) {
@@ -313,4 +326,15 @@ function localExport(data) {
   const filename = `cairon-${data.id}-${timestamp}.json`;
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   saveAs(blob, filename); 
+}
+
+
+async function sendGameSession(sessionJson) {
+  const endpoint = "https://script.google.com/macros/s/AKfycbzGDzNRlA7PGk-QZvxIJwFRNr6qD6saceZ2OxX2egbxPyzzpA2Qvcac04xPUG_lSDmY/exec";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(sessionJson)
+  });
+  return res.json();
 }
