@@ -104,6 +104,9 @@ export function saveTurn() {
   updateTurnNo();
   $('historyCard').classList.remove('hidden');
   $('endGameCard').classList.remove('hidden');
+  if (!S.paused && S.turns.length >= 1) {
+    toggleTurnTimer();
+  }
 }
 
 export function createCreatureBlock(index) {
