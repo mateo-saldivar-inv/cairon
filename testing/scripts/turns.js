@@ -70,13 +70,14 @@ export function saveTurn() {
   });
 
   const duration = S._turnStart ? Math.floor((Date.now() - S._turnStart) / 1000) : (S?.draftTurn?.elapsed || 0);
-
+  const endScore = parseInt($('turnEndScore').value, 10);
   const t = {
     turnNo: S.turns.length + 1,
     player: $('playerSelect').value,
     duration,
     creatures,
     specials,
+    endScore: Number.isFinite(endScore) ? endScore : 0,
     notes: $('turnNotes').value.trim()
   };
 
@@ -94,6 +95,7 @@ export function saveTurn() {
   $('btnTurnToggle').textContent = 'Iniciar';
   $('turnClock').textContent = '0 s';
   $('turnNotes').value = '';
+  $('turnEndScore').value = ''; 
   $('btnSaveTurn').disabled = true;
 
   $('creatureList').innerHTML = '';
@@ -165,6 +167,7 @@ function ensureHistoryHeader() {
       <th>Criaturas</th>
       <th>Desastres</th>
       <th>Protecciones</th>
+      <th>Puntos</th>
       <th>Notas</th>
     </tr>`;
 }
@@ -185,6 +188,7 @@ export function insertRow(t) {
     <td title="${escapeAttr(formatCreaturesFull(t.creatures))}">${creaturesTxt}</td>
     <td title="${escapeAttr(formatDisastersFull(t.specials))}">${disastersTxt}</td>
     <td title="${escapeAttr(formatProtectionsFull(t.specials))}">${protecTxt}</td>
+    <td>${Number.isFinite(t.endScore) ? t.endScore : ''}</td>
     <td title="${escapeAttr(t.notes)}">${truncate(t.notes, 40)}</td>
   `;
 
@@ -362,6 +366,7 @@ function capitalize(str = '') {
 function collectTurnForm() {
   const player = $('playerSelect')?.value || '';
   const notes = $('turnNotes')?.value?.trim() || '';
+  const endScore = parseInt($('turnEndScore')?.value, 10);
 
   const creatures = Array.from(document.querySelectorAll('.creature-entry, .creature-row')).map(entry => {
     const i = entry.dataset.index;
@@ -390,8 +395,14 @@ function collectTurnForm() {
       target: r.querySelector(`[name="specTarget-${i}"]`)?.value || 'all'
     };
   });
-
-  return { player, notes, creatures, specials };
+  
+  return {
+    player,
+    notes,
+    endScore: Number.isFinite(endScore) ? endScore : null,
+    creatures,
+    specials
+  };
 }
 
 function currentElapsedSec() {
@@ -420,6 +431,7 @@ export function restoreTurnDraft() {
 
   if ($('playerSelect')) $('playerSelect').value = d.player || $('playerSelect').value;
   if ($('turnNotes')) $('turnNotes').value = d.notes || '';
+  if ($('turnEndScore')) $('turnEndScore').value = Number.isFinite(d.endScore) ? String(d.endScore) : '';
 
   $('creatureList').innerHTML = '';
   (d.creatures || []).forEach((c, idx) => {
