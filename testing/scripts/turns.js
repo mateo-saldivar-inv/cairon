@@ -12,7 +12,7 @@ function startTurn() {
   S._turnStart = Date.now() - (prevElapsed * 1000);
 
   $('btnTurnToggle').textContent = 'Detener';
-  $('btnSaveTurn').disabled = true;
+  $('btnSaveTurn').disabled = false;
 
   tickTurn();
   setTurnTick(setInterval(tickTurn, 1000));
@@ -39,6 +39,12 @@ export function updateTurnNo() {
 }
 
 export function saveTurn() {
+
+  if (turnTick) {
+    clearInterval(turnTick);
+    setTurnTick(null);
+  }
+
   const creatures = Array.from(document.querySelectorAll('.creature-entry, .creature-row')).map(entry => {
     const index = entry.dataset.index;
     return {
