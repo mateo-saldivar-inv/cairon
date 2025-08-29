@@ -13,9 +13,7 @@
       text-align: center;
     }
 
-    h2 {
-      margin-bottom: 0.5rem;
-    }
+    h2 { margin-bottom: 0.5rem; }
 
     #sessionLabel {
       font-size: 1.4rem;
@@ -28,9 +26,17 @@
       width: fit-content;
     }
 
-    #backBtn {
-      display: inline-block;
+    .btnRow {
+      display: inline-flex;
+      gap: 12px;
       margin-top: 2rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-block;
       background: #0F233C;
       color: #fff;
       padding: 10px 16px;
@@ -38,10 +44,7 @@
       font-weight: bold;
       border-radius: 6px;
     }
-
-    #backBtn:hover {
-      background: #1a365c;
-    }
+    .btn:hover { background: #1a365c; }
 
     #gmForm {
       display: block;
@@ -62,23 +65,25 @@
 
   <div id="qrcode"></div>
 
-  <a href="/testing" id="backBtn">Finalizar</a>
+  <div class="btnRow">
+    <a id="openParticipantForm" class="btn" href="#" target="_blank" rel="noopener">Abrir formulario de jugadores</a>
+    <a href="/testing" id="backBtn" class="btn">Finalizar</a>
+  </div>
 
-  <iframe
-    id="gmForm"
-    title="Formulario del Game Master"
-  >Cargando formulario…</iframe>
+  <iframe id="gmForm" title="Formulario del Game Master">Cargando formulario…</iframe>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script>
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
     const display = document.getElementById("sessionIdDisplay");
+    const openBtn = document.getElementById("openParticipantForm");
 
     if (id) {
       display.textContent = id;
 
-      const participantFormURL = `https://docs.google.com/forms/d/e/1FAIpQLSf2SMiQ2wz1KZEttRCYIZaVPTY1IcbI3X2VonIko-kuYJUn5g/viewform?usp=pp_url&entry.1293426916=${encodeURIComponent(id)}`;
+      const participantFormURL =
+        `https://docs.google.com/forms/d/e/1FAIpQLSf2SMiQ2wz1KZEttRCYIZaVPTY1IcbI3X2VonIko-kuYJUn5g/viewform?usp=pp_url&entry.1293426916=${encodeURIComponent(id)}`;
 
       new QRCode(document.getElementById("qrcode"), {
         text: participantFormURL,
@@ -86,10 +91,17 @@
         height: 256
       });
 
-      const gmFormURL = `https://docs.google.com/forms/d/e/1FAIpQLSe8uiXRaTEVAnmt2PpOcZYcOzPjyiVj5ue0gw3vGAQazD9Iqw/viewform?embedded=true&entry.595089166=${encodeURIComponent(id)}`;
+      openBtn.href = participantFormURL;
+
+      const gmFormURL =
+        `https://docs.google.com/forms/d/e/1FAIpQLSe8uiXRaTEVAnmt2PpOcZYcOzPjyiVj5ue0gw3vGAQazD9Iqw/viewform?embedded=true&entry.595089166=${encodeURIComponent(id)}`;
       document.getElementById("gmForm").src = gmFormURL;
     } else {
       display.textContent = 'ID no encontrado';
+      openBtn.removeAttribute('href');
+      openBtn.setAttribute('aria-disabled', 'true');
+      openBtn.style.opacity = '0.6';
+      openBtn.style.pointerEvents = 'none';
     }
   </script>
 </body>
