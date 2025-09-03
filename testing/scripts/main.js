@@ -1,7 +1,7 @@
 import { $, today } from './utils.js';
 import { S, persist } from './state.js';
 import { toggleSession, uiAfterSessionStart } from './session.js';
-import { updateTurnNo, toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow, restoreTurnDraft } from './turns.js';
+import { updateTurnNo, toggleTurnTimer, saveTurn, insertRow, createCreatureBlock, createSpecialRow, restoreTurnDraft, refreshLastScoreUI, renderHistoryFromState  } from './turns.js';
 import { setupKeyboardShortcuts } from './events.js';
 import { exportData, saveEndGameData, showPausedTime, populateDivineInterventionOptions, deleteSessionNow } from './session.js';
 
@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('gameNumber').addEventListener('input', updateSessionId);
   $('numPlayers').addEventListener('change', updateSessionId);
   updateSessionId(); 
+
+  $('playerSelect').addEventListener('change', refreshLastScoreUI);
+
 
   $('btnSessionToggle').onclick = toggleSession;
   $('btnTurnToggle').onclick    = toggleTurnTimer;
@@ -106,7 +109,8 @@ function restorePausedSession() {
   $('historyCard').classList.add('hidden');
   $('endGameCard').classList.add('hidden');
   updateTurnNo();
-
+  renderHistoryFromState();
+  refreshLastScoreUI();  
   showPausedTime();
 }
 
@@ -114,9 +118,9 @@ function restoreActiveSession() {
   restoreSessionFormFields();
   uiAfterSessionStart();
   populateDivineInterventionOptions();
+  renderHistoryFromState();
 
   if (S.turns?.length > 0) {
-    S.turns.forEach(insertRow);
     $('historyCard').classList.remove('hidden');
     $('endGameCard').classList.remove('hidden');
   }
@@ -134,4 +138,5 @@ function restoreActiveSession() {
   } else {
     updateTurnNo();
   }
+  refreshLastScoreUI();  
 }

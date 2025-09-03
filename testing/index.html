@@ -117,8 +117,16 @@
         <div class="grid" style="margin-top: .5rem;">
           <label>Puntos al final del turno
             <input id="turnEndScore" type="number" min="0" placeholder="0">
+            <div class="hintRow">
+              <span class="muted">
+                Última de <italic id="lastScorePlayer">—</italic>:
+                <span id="lastScoreValue">—</span>
+              </span>
+              <button id="btnUseLastScore" type="button" class="btn-ghost tiny" disabled>Usar</button>
+            </div>
           </label>
         </div>
+ 
         <!-- Notas -->
         <div class="notes-block">
           <label>Notas (opcional)

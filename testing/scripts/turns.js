@@ -18,6 +18,8 @@ function startTurn() {
   setTurnTick(setInterval(tickTurn, 1000));
 
   snapshotTurnDraft(true);
+  try { refreshLastScoreUI(); } catch {}
+
 }
 
 function tickTurn() {
@@ -110,6 +112,7 @@ export function saveTurn() {
   const sel = $('playerSelect');
   sel.selectedIndex = (sel.selectedIndex + 1) % sel.options.length;
   updateTurnNo();
+  try { refreshLastScoreUI(); } catch {}
   $('historyCard').classList.remove('hidden');
   $('endGameCard').classList.remove('hidden');
   if (!S.paused && S.turns.length >= 1) {
@@ -169,11 +172,11 @@ function ensureHistoryHeader() {
     <tr>
       <th>#</th>
       <th>J</th>
-      <th>Dur</th>
+      <th>Puntos</th>
       <th>Criaturas</th>
       <th>Desastres</th>
       <th>Protecciones</th>
-      <th>Puntos</th>
+      <th>Dur</th>
       <th>Notas</th>
     </tr>`;
 }
@@ -190,11 +193,11 @@ export function insertRow(t) {
   tr.innerHTML = `
     <td>${t.turnNo}</td>
     <td>${t.player}</td>
-    <td>${t.duration}s</td>
+    <td>${Number.isFinite(t.endScore) ? t.endScore : ''}</td>
     <td title="${escapeAttr(formatCreaturesFull(t.creatures))}">${creaturesTxt}</td>
     <td title="${escapeAttr(formatDisastersFull(t.specials))}">${disastersTxt}</td>
     <td title="${escapeAttr(formatProtectionsFull(t.specials))}">${protecTxt}</td>
-    <td>${Number.isFinite(t.endScore) ? t.endScore : ''}</td>
+    <td>${t.duration}s</td>
     <td title="${escapeAttr(t.notes)}">${truncate(t.notes, 40)}</td>
   `;
 
@@ -470,9 +473,13 @@ export function restoreTurnDraft() {
   });
 
   if (d.running) {
+    if (turnTick) {
+      clearInterval(turnTick);
+      setTurnTick(null);
+    }
     S._turnStart = Date.now() - (d.elapsed * 1000);
     $('btnTurnToggle').textContent = 'Detener';
-    $('btnSaveTurn').disabled = true;
+    $('btnSaveTurn').disabled = false; 
     tickTurn();
     setTurnTick(setInterval(tickTurn, 1000));
   } else {
@@ -480,6 +487,53 @@ export function restoreTurnDraft() {
     $('btnTurnToggle').textContent = 'Iniciar';
     $('btnSaveTurn').disabled = (d.elapsed || d.creatures?.length || d.specials?.length || d.notes) ? false : true;
   }
-
   updateTurnNo();
+}
+
+function getLastScoreFor(player) {
+  if (!S?.turns?.length) return null;
+  for (let i = S.turns.length - 1; i >= 0; i--) {
+    const t = S.turns[i];
+    if (t.player === player && Number.isFinite(t.endScore)) return t.endScore;
+  }
+  return null;
+}
+
+export function refreshLastScoreUI() {
+  const player = $('playerSelect')?.value || '';
+  const last = getLastScoreFor(player);
+  const elPlayer = $('lastScorePlayer');
+  const elValue  = $('lastScoreValue');
+  const btnUse   = $('btnUseLastScore');
+
+  if (elPlayer) elPlayer.textContent = player || '—';
+  if (elValue)  elValue.textContent  = (last ?? '—');
+  if (btnUse)   btnUse.disabled      = (last == null);
+
+  if (btnUse && !btnUse._wired) {
+    btnUse._wired = true;
+    btnUse.onclick = () => {
+      const p = $('playerSelect')?.value || '';
+      const v = getLastScoreFor(p);
+      if (v != null && $('turnEndScore')) $('turnEndScore').value = v;
+    };
+  }
+}
+
+
+export function renderHistoryFromState() {
+  const thead = $('turnTable').querySelector('thead');
+  const tbody = $('turnTable').querySelector('tbody');
+
+  thead.innerHTML = '';
+  tbody.innerHTML = '';
+
+  if (!S?.turns?.length) {
+    $('historyCard').classList.add('hidden');
+    return;
+  }
+
+  S.turns.forEach(insertRow);
+
+  $('historyCard').classList.remove('hidden');
 }

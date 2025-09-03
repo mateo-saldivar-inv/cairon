@@ -1,5 +1,5 @@
 import { $, pad2, toast } from './utils.js';
-import { S, persist, setS, globalTick, setGlobalTick } from './state.js';
+import { S, persist, setS, globalTick, setGlobalTick, turnTick, setTurnTick } from './state.js';
 import { snapshotTurnDraft, restoreTurnDraft, updateTurnNo } from './turns.js';
 
              
@@ -75,32 +75,39 @@ export function toggleSession() {
 }
 
 export function pauseSession() {
+  if (!S) return;
+
   S.paused = true;
   S.pauseTime = Date.now();
 
-  snapshotTurnDraft(!!S._turnStart); 
+  const wasRunning = !!turnTick;
+  if (turnTick) {
+    clearInterval(turnTick);
+    setTurnTick(null);
+  }
 
+  snapshotTurnDraft(wasRunning);
   persist();
 
-  clearInterval(globalTick);
-  setGlobalTick(null);
+  if (globalTick) {
+    clearInterval(globalTick);
+    setGlobalTick(null);
+  }
 
   $('stepTurn').classList.add('hidden');
-  $('historyCard').classList.add('hidden');
   $('endGameCard').classList.add('hidden');
   $('btnSessionToggle').textContent = 'Reanudar Sesión';
 
   showPausedTime();
-
   toast('Sesión pausada');
 }
 
+
 export function resumeSession() {
-  if (!S.paused || !S.pauseTime) return;
+  if (!S?.paused || !S.pauseTime) return;
 
   const pausedDuration = Date.now() - S.pauseTime;
   S.start += pausedDuration;
-  if (S._turnStart) S._turnStart += pausedDuration;
 
   S.paused = false;
   S.pauseTime = null;
@@ -108,18 +115,34 @@ export function resumeSession() {
 
   uiAfterSessionStart();
 
-  startGlobalTimer();
   $('btnSessionToggle').textContent = 'Pausar Sesión';
-
   $('stepTurn').classList.remove('hidden');
-  if (S.turns.length > 0) $('historyCard').classList.remove('hidden');
-  if (S.finalData) $('endGameCard').classList.remove('hidden');
 
+  const hasTurns = Array.isArray(S.turns) && S.turns.length > 0;
+
+  if (hasTurns) $('historyCard').classList.remove('hidden');
+
+  if (hasTurns) {
+    $('endGameCard').classList.remove('hidden');
+  } else {
+    $('endGameCard').classList.add('hidden');
+  }
+
+  if (S.finalData) {
+    import('./session.js').then(({ populateFinalData }) => {
+      populateFinalData(S.finalData);
+    });
+    document.querySelector('[data-step="4"]')?.classList.remove('hidden');
+  } else {
+    document.querySelector('[data-step="4"]')?.classList.add('hidden');
+  }
 
   restoreTurnDraft();
 
   toast('Sesión reanudada');
 }
+
+
 
 
 export function uiAfterSessionStart() {
@@ -204,7 +227,6 @@ function renderScoreInputs(n) {
 }
 
 
-// ✅ COLLECT FINAL DATA
 function collectFinalData() {
   const get = id => $(id)?.value;
   const toIntSel = sel => {

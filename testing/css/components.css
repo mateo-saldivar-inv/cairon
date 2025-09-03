@@ -193,3 +193,28 @@
   color: #fff;
 }
 #btnConfirmDelete:not([disabled]):hover { background: #d32f2f; }
+
+.hintRow {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .35rem;
+  flex-wrap: wrap;
+}
+
+.muted {
+  color: #6b7280;
+  font-size: .85rem;
+}
+
+.btn-ghost.tiny {
+  background: #eee;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.btn-ghost.tiny:hover { background: #e5e7eb; }
+
