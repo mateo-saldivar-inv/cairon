@@ -1,5 +1,11 @@
-import { $, toast, shortDis } from './utils.js';
+import { $, toast, pad2  } from './utils.js';
 import { S, persist, setTurnTick, turnTick } from './state.js';
+import {
+  wireAutoTarget,
+  attachProtectionSmartDefaults,
+  setRestoring
+} from './smartTargets.js';
+
 
 export function toggleTurnTimer() {
   if (turnTick) stopTurn();
@@ -49,11 +55,15 @@ export function saveTurn() {
 
   const creatures = Array.from(document.querySelectorAll('.creature-entry, .creature-row')).map(entry => {
     const index = entry.dataset.index;
+    const dir = entry.querySelector(`[name="creatureDirection-${index}"]`).value;
+    let target = entry.querySelector(`[name="creatureTarget-${index}"]`).value;
+    if (dir === 'Cancelar') target = 'none';
+  
     return {
       name: entry.querySelector(`[name="creatureName-${index}"]`).value.trim(),
       effect: entry.querySelector(`[name="creatureEffect-${index}"]`).value,
-      direction: entry.querySelector(`[name="creatureDirection-${index}"]`).value,
-      targetPlayer: entry.querySelector(`[name="creatureTarget-${index}"]`).value
+      direction: dir,
+      targetPlayer: target
     };
   });
 
@@ -126,7 +136,7 @@ export function createCreatureBlock(index) {
   wrapper.dataset.index = index;
 
   const playerOptions = Array.from({ length: S.numPlayers }, (_, i) => {
-    const p = `P${i + 1}`;
+    const p = `P${pad2(i + 1)}`;            // <- ALWAYS P01..P0N
     return `<option value="${p}">${p}</option>`;
   }).join('');
 
@@ -139,30 +149,39 @@ export function createCreatureBlock(index) {
       <option>Ninguno</option>
     </select>
     <select name="creatureDirection-${index}">
+      <option>Libre</option>
       <option>Izquierda</option>
       <option>Derecha</option>
-      <option>Libre</option>
       <option>Cancelar</option>
     </select>
-    <select name="creatureTarget-${index}">${playerOptions}</select>
+    <select name="creatureTarget-${index}">
+      ${playerOptions}
+      <option value="none">Nadie</option>
+    </select>
     <button type="button" class="btnRemoveCreature" title="Eliminar">–</button>
   `;
 
   const directionSel = wrapper.querySelector(`[name="creatureDirection-${index}"]`);
   const targetSel    = wrapper.querySelector(`[name="creatureTarget-${index}"]`);
 
+  if (![...targetSel.options].some(o => o.value === targetSel.value)) {
+    targetSel.value = 'P01';
+  }
+
+  wireAutoTarget(directionSel, targetSel);
+
   function updateTargetVisibility() {
     const isCancel = directionSel.value === 'Cancelar';
     targetSel.disabled = isCancel;
     targetSel.style.visibility = isCancel ? 'hidden' : 'visible';
   }
-
   directionSel.addEventListener('change', updateTargetVisibility);
   updateTargetVisibility();
 
   wrapper.querySelector('.btnRemoveCreature').onclick = () => wrapper.remove();
   return wrapper;
 }
+
 
 
 function ensureHistoryHeader() {
@@ -210,7 +229,7 @@ export function createSpecialRow(index) {
   wrap.dataset.index = index;
 
   const players = Array.from({ length: S.numPlayers }, (_, i) =>
-    `<option value="P${i + 1}">P${i + 1}</option>`).join('');
+    `<option value="P${pad2(i + 1)}">P${pad2(i + 1)}</option>`).join('');
 
   wrap.innerHTML = `
     <select name="specType-${index}" class="spec-type">
@@ -230,17 +249,17 @@ export function createSpecialRow(index) {
       <option value="milagro">Milagro</option>
       <option value="prodigio">Prodigio</option>
     </select>
-    <select name="specTarget-${index}" class="spec-target">
+    <select name="specTarget-${index}" class="spec-target" data-autoset="true">
       <option value="all">Todos</option>
       ${players}
     </select>
     <button type="button" class="btnRemoveSpecial">–</button>
   `;
 
-  const typeSel = wrap.querySelector('.spec-type');
-  const scopeSel = wrap.querySelector('.spec-scope');
-  const elemSel = wrap.querySelector('.spec-element');
-  const kindSel = wrap.querySelector('.spec-kind');
+  const typeSel   = wrap.querySelector('.spec-type');
+  const scopeSel  = wrap.querySelector('.spec-scope');
+  const elemSel   = wrap.querySelector('.spec-element');
+  const kindSel   = wrap.querySelector('.spec-kind');
   const targetSel = wrap.querySelector('.spec-target');
 
   function syncUI() {
@@ -253,7 +272,7 @@ export function createSpecialRow(index) {
       scopeSel.classList.add('hidden');
       elemSel.classList.add('hidden');
       targetSel.querySelector('[value="all"]').disabled = true;
-      if (targetSel.value === 'all') targetSel.value = 'P1';
+      if (targetSel.value === 'all') targetSel.value = 'P01';
       targetSel.disabled = false;
     } else {
       kindSel.classList.add('hidden');
@@ -265,7 +284,7 @@ export function createSpecialRow(index) {
         targetSel.disabled = true;
       } else {
         targetSel.disabled = false;
-        if (targetSel.value === 'all') targetSel.value = 'P1';
+        if (targetSel.value === 'all') targetSel.value = 'P01';
       }
     }
   }
@@ -276,13 +295,15 @@ export function createSpecialRow(index) {
       targetSel.disabled = true;
     } else {
       targetSel.disabled = false;
-      if (targetSel.value === 'all') targetSel.value = 'P1';
+      if (targetSel.value === 'all') targetSel.value = 'P01';
     }
   }
 
   typeSel.addEventListener('change', syncUI);
   scopeSel.addEventListener('change', scopeChanged);
   syncUI();
+
+  attachProtectionSmartDefaults(wrap, index);
 
   wrap.querySelector('.btnRemoveSpecial').onclick = () => wrap.remove();
   return wrap;
@@ -435,6 +456,7 @@ export function snapshotTurnDraft(runningFlag) {
 
 export function restoreTurnDraft() {
   if (!S?.draftTurn) return;
+  setRestoring(true); 
 
   const d = S.draftTurn;
 
@@ -449,7 +471,7 @@ export function restoreTurnDraft() {
     el.querySelector(`[name="creatureEffect-${idx}"]`).value = c.effect || 'Ninguno';
     el.querySelector(`[name="creatureDirection-${idx}"]`).value = c.direction || 'Libre';
     el.querySelector(`[name="creatureDirection-${idx}"]`).dispatchEvent(new Event('change'));
-    el.querySelector(`[name="creatureTarget-${idx}"]`).value = c.targetPlayer || 'P1';
+    el.querySelector(`[name="creatureTarget-${idx}"]`).value = c.targetPlayer || 'P01';
     $('creatureList').appendChild(el);
   });
 
@@ -461,7 +483,7 @@ export function restoreTurnDraft() {
 
     if (s.type === 'proteccion') {
       el.querySelector(`[name="specKind-${idx}"]`).value = s.kind || 'milagro';
-      el.querySelector(`[name="specTarget-${idx}"]`).value = s.player || 'P1';
+      el.querySelector(`[name="specTarget-${idx}"]`).value = s.player || 'P01';
     } else {
       el.querySelector(`[name="specScope-${idx}"]`).value = s.scope || 'global';
       el.querySelector(`[name="specElement-${idx}"]`).value = s.element || 'tierra';
@@ -479,7 +501,7 @@ export function restoreTurnDraft() {
     }
     S._turnStart = Date.now() - (d.elapsed * 1000);
     $('btnTurnToggle').textContent = 'Detener';
-    $('btnSaveTurn').disabled = false; 
+    $('btnSaveTurn').disabled = false;
     tickTurn();
     setTurnTick(setInterval(tickTurn, 1000));
   } else {
@@ -487,8 +509,11 @@ export function restoreTurnDraft() {
     $('btnTurnToggle').textContent = 'Iniciar';
     $('btnSaveTurn').disabled = (d.elapsed || d.creatures?.length || d.specials?.length || d.notes) ? false : true;
   }
+
   updateTurnNo();
+  setRestoring(false);
 }
+
 
 function getLastScoreFor(player) {
   if (!S?.turns?.length) return null;
