@@ -10,8 +10,5 @@ export function setupKeyboardShortcuts() {
       e.preventDefault();
       $('btnTurnToggle').click();
     }
-    else if (e.key === 'Enter' && !$('btnSaveTurn').disabled) {
-      $('btnSaveTurn').click();
-    }
   });
 }
