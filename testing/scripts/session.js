@@ -321,28 +321,63 @@ export function deleteSessionNow(silent = false) {
 
 export async function exportData() {
   if (!S) return toast('No hay sesión activa.');
-  const id = S.id;
+  const id  = S.id;
   const btn = $('btnExport');
-  if (btn) btn.disabled = true;
+
+  if (btn?.dataset.mode === 'failed') {
+    try {
+      localExport(S);
+      toast('Copia descargada. Puedes presionar "Continuar" cuando estés listo.');
+    } catch (e) {
+      console.error('localExport failed:', e);
+      toast('No se pudo descargar la copia local.');
+    }
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.dataset.mode = 'exporting';
+  }
 
   try {
     await sendGameSession(S);
     toast('Datos enviados');
-    stopSession();
-    window.location.assign(`thanks.html?id=${encodeURIComponent(id)}`);
+    removeContinueButton();    
+    stopSession();           
+    await navigateToThanks(id);
   } catch (err) {
     console.error(err);
     toast('Error al enviar. Guardando localmente…');
-    localExport(S);
-    stopSession();
-    window.location.assign(`thanks.html?id=${encodeURIComponent(id)}`);
+
+    try {
+      if (!btn?.dataset.downloaded) {
+        localExport(S);
+        if (btn) btn.dataset.downloaded = '1';
+      }
+    } catch (e) {
+      console.error('localExport failed:', e);
+      toast('No se pudo descargar la copia local.');
+    }
+
+    if (btn) {
+      btn.disabled     = false;
+      btn.textContent  = 'Descargar';
+      btn.title        = 'Descarga otra copia si la necesitas. Usa "Continuar" para finalizar.';
+      btn.dataset.mode = 'failed';
+    }
+    ensureContinueButton(id);
   } finally {
-    if (btn) btn.disabled = false;
+    if (btn && btn.dataset.mode === 'exporting') {
+      btn.disabled = false;
+      delete btn.dataset.mode; 
+    }
   }
 }
 
 
-//Replace with server export
+
+
 function localExport(data) {
   const timestamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16);
   const filename = `cairon-${data.id}-${timestamp}.json`;
@@ -352,11 +387,66 @@ function localExport(data) {
 
 
 async function sendGameSession(sessionJson) {
+  const fail = localStorage.getItem('exportFailMode');
+  if (fail) {
+    if (fail === 'timeout') {
+      await new Promise(r => setTimeout(r, 2000));
+      throw new Error('Timeout (test)');
+    }
+    if (fail === 'neterr')  throw new TypeError('Failed to fetch');   
+    if (fail === 'badjson') throw new Error('Non-JSON response (test)'); 
+    if (fail === 'http500') throw new Error('HTTP 500');
+  }
+  
   const endpoint = "https://script.google.com/macros/s/AKfycbzGDzNRlA7PGk-QZvxIJwFRNr6qD6saceZ2OxX2egbxPyzzpA2Qvcac04xPUG_lSDmY/exec";
   const res = await fetch(endpoint, {
     method: "POST",
-    headers: { "Content-Type": "text/plain" },
+    headers: { "Content-Type": "text/plain", "Accept": "application/json" },
     body: JSON.stringify(sessionJson)
   });
-  return res.json();
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { throw new Error("Non-JSON response"); }
 }
+
+
+
+function ensureContinueButton(sessionId) {
+  let cta = document.getElementById('btnContinueThanks');
+  if (cta) return cta;
+
+  const exportBtn = document.getElementById('btnExport');
+  if (!exportBtn) return null;
+
+  cta = document.createElement('button');
+  cta.id = 'btnContinueThanks';
+  cta.type = 'button';
+  cta.className = 'wide';
+  cta.textContent = 'Continuar';
+  cta.title = 'Ir a la página de agradecimiento y limpiar la sesión';
+  cta.style.marginLeft = '1.0rem'; 
+
+  exportBtn.insertAdjacentElement('afterend', cta);
+
+  cta.onclick = async () => {
+    stopSession();
+    await navigateToThanks(sessionId);
+  };
+
+  return cta;
+}
+
+function removeContinueButton() {
+  const cta = document.getElementById('btnContinueThanks');
+  if (cta) cta.remove();
+}
+
+async function navigateToThanks(id) {
+  window.location.assign(thanksUrlFor(id));
+}
+
+function thanksUrlFor(id) {
+  const base = location.href.replace(/[^/]+$/, '');
+  return `${base}thanks.html?id=${encodeURIComponent(id)}`;
+}
+
